@@ -67,6 +67,28 @@ body{font-family:system-ui,sans-serif;background:var(--color-background-tertiary
 .row-btn.wa-btn:disabled{opacity:.4;cursor:not-allowed}
 .row-btn.wa-sent{background:#f0f0ee;color:#aaa;border-color:#ddd;cursor:default}
 .row-btn.wa-sent:hover{background:#f0f0ee;color:#aaa;border-color:#ddd}
+
+/* ── MENÚ CAMBIO DE ESTADO ── */
+.estado-menu-wrap{position:relative;display:inline-block}
+.estado-menu-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:.5px solid var(--color-border-secondary,#ccc);background:transparent;cursor:pointer;font-size:13px;color:var(--color-text-secondary,#888);transition:all .15s;letter-spacing:1px;padding:0}
+.estado-menu-btn:hover{background:#f0f4ff;color:#185FA5;border-color:#B5D4F4}
+.estado-menu{position:absolute;right:0;top:calc(100% + 4px);background:var(--color-background-primary,#fff);border:.5px solid var(--color-border-tertiary,#e0e0d8);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.14);padding:6px 0;min-width:200px;z-index:200;display:none}
+.estado-menu.show{display:block;animation:fadeIn .15s ease}
+.estado-menu-header{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-secondary,#888);padding:4px 12px 6px;border-bottom:.5px solid var(--color-border-tertiary,#eee);margin-bottom:4px}
+.estado-menu button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:7px 12px;border:none;background:none;cursor:pointer;font-size:12px;color:var(--color-text-primary,#1a1a1a);transition:background .1s}
+.estado-menu button:hover{background:var(--color-background-secondary,#f5f5f0)}
+.estado-menu button.current{opacity:.4;cursor:default;pointer-events:none}
+.estado-menu button.current:hover{background:none}
+.estado-menu-sep{height:.5px;background:var(--color-border-tertiary,#eee);margin:4px 0}
+.estado-menu button.danger{color:#A32D2D}
+.estado-menu button.danger:hover{background:#FCEBEB}
+
+/* ── Reprogramar modal ── */
+.reprogram-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:flex;align-items:center;justify-content:center}
+.reprogram-modal{background:var(--color-background-primary,#fff);border-radius:14px;padding:24px;width:90%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,.22)}
+.reprogram-modal h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.reprogram-modal p{margin:0 0 16px;font-size:12px;color:var(--color-text-secondary,#888);line-height:1.5}
+
 .fecha-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:flex;align-items:center;justify-content:center}
 .fecha-modal{background:var(--color-background-primary,#fff);border-radius:14px;padding:24px;width:90%;max-width:340px;box-shadow:0 8px 40px rgba(0,0,0,.22)}
 .fecha-modal h3{margin:0 0 6px;font-size:15px;font-weight:600}
@@ -103,29 +125,19 @@ body{font-family:system-ui,sans-serif;background:var(--color-background-tertiary
 .cita-row{padding:10px 0;border-bottom:.5px solid var(--color-border-tertiary,#eee)}
 .cita-title{font-size:12px;font-weight:500;font-family:monospace;color:var(--color-text-primary,#1a1a1a);word-break:break-all;line-height:1.5;margin-bottom:4px;display:flex;align-items:flex-start;gap:8px}
 .cita-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
-
-/* Badges de estado */
 .estado-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
 .estado-badge.pendiente{background:#FFF4D6;color:#9A6B00;border:1px solid #FFD166}
 .estado-badge.reservada{background:#E6F1FB;color:#0C447C;border:1px solid #B5D4F4}
 .estado-badge.visitada{background:#EAF3DE;color:#27500A;border:1px solid #C0DD97}
-
 .preprog-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:20px;background:#FFF4D6;color:#9A6B00;border:1px solid #FFD166;font-weight:600}
-
-/* Toggle presupuesto */
 .presup-toggle{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid transparent}
 .presup-toggle.pendiente{background:#FCEBEB;color:#A32D2D;border-color:#F0ACAC}
 .presup-toggle.pendiente:hover{background:#f7c1c1}
 .presup-toggle.completado{background:#EAF3DE;color:#27500A;border-color:#C0DD97}
 .presup-toggle.completado:hover{background:#d4e8c2}
-
-/* Fecha/hora mostrada en fila */
 .reserva-info{font-size:10px;color:#185FA5;font-weight:600;display:inline-flex;align-items:center;gap:3px;background:#E6F1FB;padding:1px 6px;border-radius:4px;margin-right:4px}
-
 .spinner{width:14px;height:14px;border:2px solid #B5D4F4;border-top-color:#185FA5;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* Limpiar por estado */
 .limpiar-dropdown{position:relative;display:inline-block}
 .limpiar-menu{position:absolute;top:100%;right:0;background:var(--color-background-primary,#fff);border:.5px solid var(--color-border-tertiary,#e0e0d8);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:4px 0;min-width:180px;z-index:50;display:none}
 .limpiar-menu.show{display:block}
@@ -133,8 +145,6 @@ body{font-family:system-ui,sans-serif;background:var(--color-background-tertiary
 .limpiar-menu button:hover{background:var(--color-background-secondary,#f5f5f0)}
 .limpiar-menu button.danger{color:#A32D2D}
 .limpiar-menu button.danger:hover{background:#FCEBEB}
-
-/* Zona contenedora sin badge para stats */
 .zona-count-in-header{font-size:10px;color:var(--color-text-secondary,#888);margin-left:6px}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -145,8 +155,8 @@ body{font-family:system-ui,sans-serif;background:var(--color-background-tertiary
   <div class="header">
     <i class="ti ti-calendar-event" style="font-size:22px;color:#185FA5" aria-hidden="true"></i>
     <h1>Mediciones</h1>
-    <span class="badge">v11</span>
-    <span class="badge badge-new">Estados</span>
+    <span class="badge">v12</span>
+    <span class="badge badge-new">Reprogramar</span>
   </div>
   <div class="step-bar">
     <div class="step active" id="step1" onclick="abrirPanelExcelDesdeStep()" style="cursor:pointer" title="Subir nuevo Excel"><i class="ti ti-upload" aria-hidden="true"></i> Excel</div>
@@ -290,6 +300,22 @@ body{font-family:system-ui,sans-serif;background:var(--color-background-tertiary
   </div>
 </div>
 
+<!-- MODAL REPROGRAMAR -->
+<div class="reprogram-modal-overlay" id="reprogramModalOverlay" style="display:none" onclick="if(event.target===this)cerrarReprogramModal()">
+  <div class="reprogram-modal">
+    <h3><i class="ti ti-calendar-repeat" style="color:#185FA5;font-size:16px"></i> Reprogramar cita</h3>
+    <p style="margin-bottom:14px">Cambia la fecha y hora de la reserva de <strong id="rpClienteNombre"></strong>. Se mantendrá en estado <em>Reservada</em> y se resetea el WhatsApp.</p>
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <div style="flex:1"><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px">Nueva fecha</label><input type="date" id="rpFecha" class="field-input"></div>
+      <div style="flex:1"><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px">Nueva hora</label><input type="time" id="rpHora" value="09:00" class="field-input"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="confirmarReprogramar()"><i class="ti ti-calendar-check" aria-hidden="true"></i> Confirmar</button>
+      <button class="btn" onclick="cerrarReprogramModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL EDITAR -->
 <div class="modal-overlay" id="modalOverlay" style="display:none" onclick="closeModalIfOuter(event)">
   <div class="modal">
@@ -344,8 +370,9 @@ let citasGeneradas = [];
 let activeOrdenId = null;
 let filtroActivo = 'todas';
 let limpiarMenuOpen = false;
+let activeEstadoMenuId = null;
+let _reprogramOrdenId = null;
 
-// Nuevo sistema de estados
 const ESTADOS = { PENDIENTE: 'pendiente', RESERVADA: 'reservada', VISITADA: 'visitada' };
 
 const CP_MAP = {
@@ -426,14 +453,13 @@ function mostrarErrorObligatorios(nombre, missing){
   toast(`${nombre}: faltan → ${missing.join(', ')}`, 'error');
 }
 
-// Formatear fecha para mostrar
 function fmtFecha(fecha){
   if(!fecha) return '';
   try{ return new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }
   catch(e){ return fecha; }
 }
 
-// ── INDEXED DB (solo un store, sin STORE_PROG) ────────────────
+// ── INDEXED DB ────────────────────────────────────────────────
 function initDB(){
   return new Promise((res,rej)=>{
     const r=indexedDB.open(DB_NAME,DB_VERSION);
@@ -487,7 +513,12 @@ document.addEventListener('click',e=>{
     limpiarMenuOpen=false;
     document.getElementById('limpiarMenu').classList.remove('show');
   }
+  // Cerrar menú de estado si click fuera
+  if(activeEstadoMenuId && !e.target.closest('.estado-menu-wrap')){
+    cerrarTodosEstadoMenus();
+  }
 });
+
 function limpiarEstado(estado){
   const label={pendiente:'Pendientes',reservada:'Reservadas',visitada:'Visitadas'}[estado]||estado;
   const count=ordenesData.filter(o=>o.estado===estado).length;
@@ -509,6 +540,121 @@ function limpiarTodo(){
   toast('Todos los datos eliminados','success');
   limpiarMenuOpen=false;
   document.getElementById('limpiarMenu').classList.remove('show');
+}
+
+// ── MENÚ DE ESTADO (NUEVO) ────────────────────────────────────
+function cerrarTodosEstadoMenus(){
+  document.querySelectorAll('.estado-menu.show').forEach(m=>m.classList.remove('show'));
+  activeEstadoMenuId=null;
+}
+
+function toggleEstadoMenu(ordenId, event){
+  event.stopPropagation();
+  const menuId='emenu-'+ordenId;
+  const menu=document.getElementById(menuId);
+  if(!menu) return;
+  const isOpen=menu.classList.contains('show');
+  cerrarTodosEstadoMenus();
+  if(!isOpen){
+    menu.classList.add('show');
+    activeEstadoMenuId=ordenId;
+  }
+}
+
+// Cambio de estado directo
+function cambiarEstado(ordenId, nuevoEstado){
+  cerrarTodosEstadoMenus();
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  if(!o) return;
+  const estadoAnterior=o.estado;
+  if(estadoAnterior===nuevoEstado) return;
+
+  const labels={pendiente:'Pendiente',reservada:'Reservada',visitada:'Visitada'};
+
+  // Al volver a Pendiente: borrar fecha/hora y resetear whatsapp
+  if(nuevoEstado===ESTADOS.PENDIENTE){
+    if(!confirm(`¿Mover "${o.cliente}" a Pendiente? Se borrará la fecha/hora de reserva y el estado de WhatsApp.`)) return;
+    o.estado=ESTADOS.PENDIENTE;
+    o.fechaReserva='';
+    o.horaReserva='09:00';
+    o.whatsappEnviado=false;
+    o.calendarEventId='';
+    dbSave(ordenesData).then(()=>{ renderOrdenes(); toast(`${o.cliente} → Pendiente`,'info'); });
+
+  } else if(nuevoEstado===ESTADOS.RESERVADA){
+    // Desde visitada o pendiente → reservada
+    if(estadoAnterior===ESTADOS.VISITADA){
+      // Deshacer visita: preguntar si reprogramar o solo cambiar estado
+      abrirReprogramModal(ordenId, true);
+    } else {
+      // Desde pendiente → reservada: pedir fecha si no tiene
+      if(!o.fechaReserva){
+        abrirReprogramModal(ordenId, false);
+      } else {
+        o.estado=ESTADOS.RESERVADA;
+        o.whatsappEnviado=false;
+        dbSave(ordenesData).then(()=>{ renderOrdenes(); toast(`${o.cliente} → Reservada`,'success'); });
+      }
+    }
+
+  } else if(nuevoEstado===ESTADOS.VISITADA){
+    o.estado=ESTADOS.VISITADA;
+    dbSave(ordenesData).then(()=>{ renderOrdenes(); toast(`${o.cliente} → Visitada ✓`,'success'); });
+  }
+}
+
+// Reprogramar desde botón contexto de reservada
+function reprogramarCita(ordenId){
+  cerrarTodosEstadoMenus();
+  abrirReprogramModal(ordenId, false);
+}
+
+function abrirReprogramModal(ordenId, esDesdeVisitada){
+  _reprogramOrdenId=ordenId;
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  document.getElementById('rpClienteNombre').textContent=o?.cliente||ordenId;
+  // Prerellenar con fecha actual si existe
+  document.getElementById('rpFecha').value=o?.fechaReserva||new Date().toISOString().split('T')[0];
+  document.getElementById('rpHora').value=o?.horaReserva||'09:00';
+  // Guardar contexto
+  document.getElementById('reprogramModalOverlay')._esDesdeVisitada=esDesdeVisitada;
+  document.getElementById('reprogramModalOverlay').style.display='flex';
+}
+function cerrarReprogramModal(){
+  document.getElementById('reprogramModalOverlay').style.display='none';
+  _reprogramOrdenId=null;
+}
+function confirmarReprogramar(){
+  const fecha=document.getElementById('rpFecha').value;
+  const hora=document.getElementById('rpHora').value||'09:00';
+  if(!fecha){ toast('Introduce la fecha','error'); return; }
+  const o=ordenesData.find(x=>x.orden===_reprogramOrdenId);
+  if(!o){ cerrarReprogramModal(); return; }
+
+  o.estado=ESTADOS.RESERVADA;
+  o.fechaReserva=fecha;
+  o.horaReserva=hora;
+  o.whatsappEnviado=false;
+  o.presupuestoEstado='pendiente';
+
+  cerrarReprogramModal();
+
+  // Si hay datos suficientes, ofrecer abrir Calendar
+  const missing=validarOrden(o);
+  if(!missing.length){
+    activeOrdenId=o.orden;
+    const inicio=new Date(`${fecha}T${hora}:00`);
+    const fin=new Date(inicio.getTime()+60*60000);
+    const url=buildGoogleCalendarUrl({title:buildTitle(o),description:buildDescription(o),start:inicio,end:fin});
+    dbSave(ordenesData).then(()=>{ renderOrdenes(); });
+    toast(`${o.cliente} reprogramada para ${fmtFecha(fecha)} ${hora}`,'success');
+    if(confirm(`¿Abrir Google Calendar para crear el evento del ${fmtFecha(fecha)} a las ${hora}?`)){
+      window.open(url,'_blank');
+    }
+  } else {
+    dbSave(ordenesData).then(()=>{ renderOrdenes(); });
+    toast(`${o.cliente} → Reservada (${fmtFecha(fecha)} ${hora})`,'success');
+  }
 }
 
 // ── EXCEL ─────────────────────────────────────────────────────
@@ -573,7 +719,6 @@ function mostrarMapping(){
       <div><div style="font-size:12px;font-weight:600">${c.label}${c.required?' <span style="color:#c0392b">*</span>':''}</div><div style="font-size:10px;color:var(--color-text-secondary,#888)">${c.hint}</div></div>
       ${optionsHtml(c.key)}
     </div>`).join('');
-  // Guardar mapping para procesarExcel
   window._colMapping=colMapping;
 }
 
@@ -592,7 +737,6 @@ function procesarExcel(){
       provincia:detectProvincia(cp),
       seleccionada:true,
       telefono:'',email:'',direccion:'',imageData:null,
-      // Nuevos campos de estado
       estado:ESTADOS.PENDIENTE,
       fechaReserva:'',horaReserva:'09:00',
       whatsappEnviado:false,
@@ -636,10 +780,7 @@ function actualizarVisitadasAutomaticamente(){
     if(o.estado!==ESTADOS.RESERVADA) return;
     if(!o.fechaReserva) return;
     const fechaHora=new Date(`${o.fechaReserva}T${o.horaReserva||'09:00'}`);
-    if(fechaHora<ahora){
-      o.estado=ESTADOS.VISITADA;
-      cambiadas++;
-    }
+    if(fechaHora<ahora){ o.estado=ESTADOS.VISITADA; cambiadas++; }
   });
   if(cambiadas>0) dbSave(ordenesData);
   return cambiadas;
@@ -651,25 +792,20 @@ function showOrdenes(){
   document.getElementById('viewOrdenes').style.display='block';
   setStep(2);
   document.getElementById('fechaInicio').value=new Date().toISOString().split('T')[0];
-  // Ejecutar auto-actualización de visitadas
   const cambiadas=actualizarVisitadasAutomaticamente();
   if(cambiadas>0) renderOrdenes();
 }
 
 function renderOrdenes(){
-  // Contadores por estado
   const pendientes=ordenesData.filter(o=>o.estado===ESTADOS.PENDIENTE).length;
   const reservadas=ordenesData.filter(o=>o.estado===ESTADOS.RESERVADA).length;
   const visitadas=ordenesData.filter(o=>o.estado===ESTADOS.VISITADA).length;
 
-  const cntP=document.getElementById('cnt-pendientes');
-  const cntR=document.getElementById('cnt-reservadas');
-  const cntV=document.getElementById('cnt-visitadas');
-  if(cntP) cntP.textContent=pendientes;
-  if(cntR) cntR.textContent=reservadas;
-  if(cntV) cntV.textContent=visitadas;
+  ['cnt-pendientes','cnt-reservadas','cnt-visitadas'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=[pendientes,reservadas,visitadas][i];
+  });
 
-  // Filtrar por estado activo
   const visibles=ordenesData.filter(o=>{
     if(filtroActivo==='todas') return true;
     if(filtroActivo==='pendientes') return o.estado===ESTADOS.PENDIENTE;
@@ -690,18 +826,12 @@ function renderOrdenes(){
   `;
 
   if(!visibles.length){
-    const msgs={
-      todas:'No hay órdenes. Sube un Excel o añade manualmente.',
-      pendientes:'No hay órdenes pendientes.',
-      reservadas:'No hay órdenes reservadas.',
-      visitadas:'No hay órdenes visitadas todavía.'
-    };
+    const msgs={todas:'No hay órdenes. Sube un Excel o añade manualmente.',pendientes:'No hay órdenes pendientes.',reservadas:'No hay órdenes reservadas.',visitadas:'No hay órdenes visitadas todavía.'};
     document.getElementById('zonasList').innerHTML=`<p style="text-align:center;padding:24px;color:var(--color-text-secondary,#888);font-size:13px">${msgs[filtroActivo]||msgs.todas}</p>`;
     updateSelectedCount();
     return;
   }
 
-  // Agrupar por provincia y dentro de cada provincia por estado
   const zonas={};
   visibles.forEach(o=>{
     const key=o.provincia;
@@ -716,16 +846,13 @@ function renderOrdenes(){
     const cc=getZona(prov)==='azul'?'zona-azul':getZona(prov)==='verde'?'zona-verde':'';
     const totalZona=grupos.pendiente.length+grupos.reservada.length+grupos.visitada.length;
 
-    // Renderizar cada subgrupo por estado
     let html='';
     const estadoLabels={pendiente:'Pendientes',reservada:'Reservadas',visitada:'Visitadas'};
-    const estadoKeys=['pendiente','reservada','visitada'];
 
-    estadoKeys.forEach(estado=>{
+    ['pendiente','reservada','visitada'].forEach(estado=>{
       const list=grupos[estado];
       if(!list.length) return;
 
-      // Cabecera de subgrupo
       html+=`<div style="display:flex;align-items:center;gap:8px;margin:${estado==='pendiente'?'0':'10px'} 0 6px 0">
         <span class="estado-badge ${estado}">${estadoLabels[estado]}</span>
         <span style="font-size:11px;color:var(--color-text-secondary,#888)">${list.length}</span>
@@ -736,30 +863,61 @@ function renderOrdenes(){
         const missing=validarOrden(o);
         const warnings=missing.length?`<span style="font-size:10px;color:#c0392b;font-weight:500" title="Faltan: ${missing.join(', ')}">&#9888; ${missing.join('·')}</span>`:'';
 
-        // Info de fecha/hora para reservadas
         const reservaInfo=(o.estado===ESTADOS.RESERVADA && o.fechaReserva)
           ? `<span class="reserva-info"><i class="ti ti-clock" style="font-size:10px" aria-hidden="true"></i>${fmtFecha(o.fechaReserva)} ${o.horaReserva||''}</span>`
           : '';
 
-        // Preprogramada badge para pendientes con fecha
         const preprogBadge=(o.estado===ESTADOS.PENDIENTE && o.fechaReserva)
-          ? `<span class="preprog-badge"><i class="ti ti-clock" style="font-size:9px" aria-hidden="true"></i>PREPROGRAMADA</span>`
+          ? `<span class="preprog-badge"><i class="ti ti-clock" style="font-size:9px" aria-hidden="true"></i>PREPROG.</span>`
           : '';
 
-        // Botones según estado
+        // ── Menú contextual de estado (·  ·  · ) ──────────────
+        const menuEstado=`
+          <div class="estado-menu-wrap">
+            <button class="estado-menu-btn" onclick="toggleEstadoMenu('${o.orden}',event)" title="Cambiar estado / Reprogramar">···</button>
+            <div class="estado-menu" id="emenu-${o.orden}">
+              <div class="estado-menu-header">Cambiar estado</div>
+              <button onclick="cambiarEstado('${o.orden}','pendiente')" class="${o.estado==='pendiente'?'current':''}">
+                <span style="width:8px;height:8px;border-radius:50%;background:#B8860B;display:inline-block;flex-shrink:0"></span>
+                Pendiente ${o.estado==='pendiente'?'<span style="font-size:10px;opacity:.6">(actual)</span>':''}
+              </button>
+              <button onclick="cambiarEstado('${o.orden}','reservada')" class="${o.estado==='reservada'?'current':''}">
+                <span style="width:8px;height:8px;border-radius:50%;background:#185FA5;display:inline-block;flex-shrink:0"></span>
+                Reservada ${o.estado==='reservada'?'<span style="font-size:10px;opacity:.6">(actual)</span>':''}
+              </button>
+              <button onclick="cambiarEstado('${o.orden}','visitada')" class="${o.estado==='visitada'?'current':''}">
+                <span style="width:8px;height:8px;border-radius:50%;background:#3B6D11;display:inline-block;flex-shrink:0"></span>
+                Visitada ${o.estado==='visitada'?'<span style="font-size:10px;opacity:.6">(actual)</span>':''}
+              </button>
+              ${o.estado===ESTADOS.RESERVADA ? `
+              <div class="estado-menu-sep"></div>
+              <button onclick="reprogramarCita('${o.orden}')">
+                <i class="ti ti-calendar-repeat" style="font-size:13px;color:#185FA5" aria-hidden="true"></i>
+                Reprogramar cita
+              </button>` : ''}
+              <div class="estado-menu-sep"></div>
+              <button class="danger" onclick="eliminarOrden('${o.orden}')">
+                <i class="ti ti-trash" style="font-size:13px" aria-hidden="true"></i>
+                Eliminar orden
+              </button>
+            </div>
+          </div>`;
+
+        // Botones principales según estado
         let botones='';
         if(o.estado===ESTADOS.PENDIENTE){
           botones=`
             <button class="row-btn" onclick="openModal('${o.orden}')" title="Editar datos"><i class="ti ti-pencil" style="font-size:12px" aria-hidden="true"></i>Editar</button>
             <button class="row-btn cal-btn" onclick="reservarOrden('${o.orden}')" title="Reservar en Google Calendar"><i class="ti ti-calendar-plus" style="font-size:12px" aria-hidden="true"></i>Reservar</button>
-            <button class="row-btn" onclick="eliminarOrden('${o.orden}')" title="Eliminar" style="color:#A32D2D;border-color:#f09595;background:#fcebeb"><i class="ti ti-trash" style="font-size:12px" aria-hidden="true"></i></button>
             ${preprogBadge}
+            ${menuEstado}
           `;
         } else if(o.estado===ESTADOS.RESERVADA){
           if(o.whatsappEnviado){
             botones=`
               <span class="row-btn wa-sent" title="WhatsApp ya enviado"><i class="ti ti-message-check" style="font-size:12px" aria-hidden="true"></i>Enviado</span>
               ${reservaInfo}
+              ${menuEstado}
             `;
           } else {
             botones=`
@@ -768,6 +926,7 @@ function renderOrdenes(){
                 WhatsApp
               </a>
               ${reservaInfo}
+              ${menuEstado}
             `;
           }
         } else if(o.estado===ESTADOS.VISITADA){
@@ -778,6 +937,7 @@ function renderOrdenes(){
             <span class="presup-toggle ${presCls}" onclick="togglePresupuesto('${o.orden}')" title="Cambiar estado del presupuesto">
               <i class="ti ${presIcon}" style="font-size:12px" aria-hidden="true"></i>${presLabel}
             </span>
+            ${menuEstado}
           `;
         }
 
@@ -823,6 +983,7 @@ function updateSelectedCount(){ document.getElementById('selectedCount').textCon
 function toggleZona(p){ const el=document.getElementById('zona-'+p.replace(/[^a-z0-9]/gi,'_')); if(el) el.style.display=el.style.display==='none'?'':'none'; }
 
 function eliminarOrden(ordenId){
+  cerrarTodosEstadoMenus();
   const o=ordenesData.find(x=>x.orden===ordenId);
   if(!o) return;
   if(!confirm(`¿Eliminar "${o.cliente||ordenId}"?`)) return;
@@ -839,7 +1000,7 @@ function setFiltro(f){
   renderOrdenes();
 }
 
-// ── MODAL ─────────────────────────────────────────────────────
+// ── MODAL EDITAR ──────────────────────────────────────────────
 function openModal(ordenId){
   activeOrdenId=ordenId;
   const o=ordenesData.find(x=>x.orden===ordenId);
@@ -902,57 +1063,36 @@ function saveModalData(){
 function reservarOrden(ordenId){
   const o=ordenesData.find(x=>x.orden===ordenId);
   if(!o) return;
-
-  // Validar campos obligatorios
   const missing=validarOrden(o);
-  if(missing.length){
-    mostrarErrorObligatorios(o.cliente||ordenId, missing);
-    openModal(ordenId);
-    return;
-  }
+  if(missing.length){ mostrarErrorObligatorios(o.cliente||ordenId, missing); openModal(ordenId); return; }
 
-  // Usar fecha de la orden si existe, si no la del formulario global
   const fecha=o.fechaReserva || document.getElementById('fechaInicio').value;
   const hora=o.horaReserva || document.getElementById('horaInicio').value || '09:00';
-
-  if(!fecha){
-    toast('Indica fecha de reserva (edita la orden o usa el formulario inferior)','error');
-    return;
-  }
+  if(!fecha){ toast('Indica fecha de reserva','error'); return; }
 
   activeOrdenId=ordenId;
   const inicio=new Date(`${fecha}T${hora}:00`);
   const fin=new Date(inicio.getTime()+60*60000);
   const url=buildGoogleCalendarUrl({title:buildTitle(o),description:buildDescription(o),start:inicio,end:fin});
 
-  // Cambiar estado a reservada
   o.estado=ESTADOS.RESERVADA;
   o.fechaReserva=fecha;
   o.horaReserva=hora;
   dbSave(ordenesData);
-
   window.open(url,'_blank');
   renderOrdenes();
   toast('Reserva preparada en Google Calendar','success');
 }
 
-// Reservar múltiples seleccionadas
 function reservarSeleccionadas(){
   const sel=ordenesData.filter(o=>o.seleccionada && o.estado===ESTADOS.PENDIENTE);
   if(!sel.length){toast('Selecciona al menos una orden pendiente','error');return;}
-
   const fecha=document.getElementById('fechaInicio').value;
   const hora=document.getElementById('horaInicio').value||'09:00';
   const dur=parseInt(document.getElementById('duracion').value)||60;
   if(!fecha){toast('Selecciona fecha','error');return;}
-
-  // Validar todas
   const invalidas=sel.map(o=>({o,missing:validarOrden(o)})).filter(x=>x.missing.length);
-  if(invalidas.length){
-    invalidas.forEach(({o,missing})=>mostrarErrorObligatorios(o.cliente||o.orden, missing));
-    toast(`${invalidas.length} orden(es) con datos incompletos`,'error');
-    return;
-  }
+  if(invalidas.length){ invalidas.forEach(({o,missing})=>mostrarErrorObligatorios(o.cliente||o.orden, missing)); toast(`${invalidas.length} orden(es) con datos incompletos`,'error'); return; }
 
   citasGeneradas=sel.map((o,i)=>{
     const[h,m]=hora.split(':').map(Number);
@@ -966,7 +1106,6 @@ function reservarSeleccionadas(){
     const calId=CALENDAR_IDS[zona]||CALENDAR_IDS['otra'];
     const title=buildTitle(o);
     const desc=buildDescription(o);
-    // Cambiar estado y guardar fecha
     o.estado=ESTADOS.RESERVADA;
     o.fechaReserva=fecha;
     o.horaReserva=`${hh}:${mm}`;
@@ -991,7 +1130,7 @@ function togglePresupuesto(ordenId){
   renderOrdenes();
 }
 
-// ── PARSER DE TÍTULO CALENDAR ─────────────────────────────────
+// ── PARSER TÍTULO CALENDAR ────────────────────────────────────
 function parseTituloEvento(summary){
   if(!summary) return null;
   try{
@@ -1009,12 +1148,8 @@ function parseTituloEvento(summary){
       const dirBlock=partes[3];
       const dirClean=dirBlock.replace(/,?\s*\d{5}\s*$/,'').trim();
       const dirParts=dirClean.split(',').map(s=>s.trim()).filter(Boolean);
-      if(dirParts.length>=2){
-        result.ciudad=dirParts[dirParts.length-1];
-        result.direccion=dirParts.slice(0,dirParts.length-1).join(', ');
-      } else {
-        result.direccion=dirClean;
-      }
+      if(dirParts.length>=2){ result.ciudad=dirParts[dirParts.length-1]; result.direccion=dirParts.slice(0,dirParts.length-1).join(', '); }
+      else { result.direccion=dirClean; }
     }
     return result;
   }catch(e){ return null; }
@@ -1041,10 +1176,7 @@ async function fetchEventFromCalendar(ordenId){
         const s=(ev.summary||'').toUpperCase();
         if(sqlNum && s.includes(sqlNum)) return true;
         if(telNorm && telNorm.length>=9 && s.includes(telNorm)) return true;
-        if(clienteNorm.length>4){
-          const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
-          if(words.filter(w=>s.includes(w)).length>=2) return true;
-        }
+        if(clienteNorm.length>4){ const words=clienteNorm.split(/\s+/).filter(w=>w.length>3); if(words.filter(w=>s.includes(w)).length>=2) return true; }
         return false;
       });
       if(match){
@@ -1061,10 +1193,7 @@ async function fetchEventFromCalendar(ordenId){
 function buildWaMsg(o,fecha,hora){
   const abrev=abrevFamilia(o.familia);
   let fechaFmt='(fecha pendiente)';
-  if(fecha){
-    try{ fechaFmt=new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}); }
-    catch(e){ fechaFmt=fecha; }
-  }
+  if(fecha){ try{ fechaFmt=new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}); }catch(e){ fechaFmt=fecha; } }
   const horaFmt=hora||'(hora pendiente)';
   const dir=o.direccion||o.ciudad||'';
   return `Hola ${o.cliente}, le contactamos de *Leroy Merlin* para confirmarle su cita de medición de *${abrev}*.\n\n📅 Fecha: ${fechaFmt}\n🕐 Hora: ${horaFmt}\n📍 Dirección: ${dir}\n\n¿Puede confirmarnos la cita? Responda *SÍ* para confirmar o *NO* si necesita cambiarla.\n\nGracias.`;
@@ -1074,25 +1203,15 @@ async function buscarYEnviarWa(ordenId){
   const o=ordenesData.find(x=>x.orden===ordenId);
   if(!o){ toast('Orden no encontrada','error'); return; }
   if(!o.telefono){ toast('Esta orden no tiene teléfono','error'); return; }
-
-  // Si ya tenemos la fecha de reserva, usarla directamente
-  if(o.fechaReserva){
-    enviarWaConFecha(o, o.fechaReserva, o.horaReserva);
-    return;
-  }
-
+  if(o.fechaReserva){ enviarWaConFecha(o, o.fechaReserva, o.horaReserva); return; }
   const btn=document.querySelector(`#row-${ordenId} .wa-btn`);
   if(btn){ btn.innerHTML='Buscando...'; btn.style.pointerEvents='none'; }
-
   try{
     const ev=await fetchEventFromCalendar(ordenId);
     if(ev) enviarWaConFecha(o, ev.fecha, ev.hora);
     else abrirFechaManual(ordenId);
-  }catch(e){
-    toast('Error buscando en Calendar','error');
-  }finally{
-    renderOrdenes();
-  }
+  }catch(e){ toast('Error buscando en Calendar','error'); }
+  finally{ renderOrdenes(); }
 }
 
 let _fechaManualOrdenId=null;
@@ -1117,7 +1236,6 @@ function enviarWaConFecha(o,fecha,hora){
   const tel=String(o.telefono||'').replace(/\D/g,'');
   const telFull=tel.startsWith('34')?tel:'34'+tel;
   const msg=buildWaMsg(o,fecha,hora);
-  // Marcar como enviado
   o.whatsappEnviado=true;
   dbSave(ordenesData);
   renderOrdenes();
@@ -1141,11 +1259,7 @@ async function sincronizarCalendario(){
   try{
     const tMin=new Date(Date.now()-120*86400000).toISOString();
     const tMax=new Date(Date.now()+365*86400000).toISOString();
-    const calEntries=[
-      {id:CALENDAR_IDS['azul'],zona:'azul'},
-      {id:CALENDAR_IDS['verde'],zona:'verde'},
-      {id:CALENDAR_IDS['amarillo'],zona:'amarillo'}
-    ];
+    const calEntries=[{id:CALENDAR_IDS['azul'],zona:'azul'},{id:CALENDAR_IDS['verde'],zona:'verde'},{id:CALENDAR_IDS['amarillo'],zona:'amarillo'}];
     let allEvents=[];
     for(let i=0;i<calEntries.length;i++){
       const{id,zona}=calEntries[i];
@@ -1173,30 +1287,21 @@ async function sincronizarCalendario(){
       const sqlNum=String(o.nSql||'').trim();
       const clienteNorm=String(o.cliente||'').toUpperCase().replace(/\[FS\]\s*-?\s*/,'').trim();
       const telNorm=String(o.telefono||'').replace(/\D/g,'');
-
       const match=allEvents.find(ev=>{
         const s=(ev.summary||'').toUpperCase();
-        // Ignorar eventos de presupuesto
         if(s.includes('PRESUPUESTO PENDIENTE')||s.includes('PRESUPUESTO COMPLETADO')){
           if(telNorm&&telNorm.length>=9&&s.includes(telNorm)) return true;
-          if(clienteNorm.length>4){
-            const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
-            if(words.filter(w=>s.includes(w)).length>=2) return true;
-          }
+          if(clienteNorm.length>4){ const words=clienteNorm.split(/\s+/).filter(w=>w.length>3); if(words.filter(w=>s.includes(w)).length>=2) return true; }
           return false;
         }
         if(sqlNum&&s.includes(sqlNum)) return true;
         if(telNorm&&telNorm.length>=9&&s.includes(telNorm)) return true;
-        if(clienteNorm.length>4){
-          const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
-          if(words.filter(w=>s.includes(w)).length>=2) return true;
-        }
+        if(clienteNorm.length>4){ const words=clienteNorm.split(/\s+/).filter(w=>w.length>3); if(words.filter(w=>s.includes(w)).length>=2) return true; }
         return false;
       });
 
       if(match){
         encontradas++;
-        // Backfill campos
         const parsed=parseTituloEvento(match.summary||'');
         if(parsed){
           if(!o.nSql&&parsed.nSql) o.nSql=parsed.nSql;
@@ -1205,23 +1310,15 @@ async function sincronizarCalendario(){
           if(!o.ciudad&&parsed.ciudad) o.ciudad=parsed.ciudad;
           if(!o.codigoPostal&&parsed.codigoPostal) o.codigoPostal=parsed.codigoPostal;
         }
-        // Guardar fecha/hora del evento
         const start=match.start?.dateTime||match.start?.date;
         if(start){
           const dt=new Date(start);
           o.fechaReserva=dt.toISOString().split('T')[0];
           o.horaReserva=match.start?.dateTime?dt.toTimeString().substring(0,5):null;
           o.calendarEventId=match.id||'';
-          // Auto-migrar a visitada si la fecha ya pasó
-          if(dt<ahora && o.estado===ESTADOS.RESERVADA){
-            o.estado=ESTADOS.VISITADA;
-            migradasAVisitada++;
-          } else if(o.estado===ESTADOS.PENDIENTE){
-            o.estado=ESTADOS.RESERVADA;
-            actualizadas++;
-          } else if(o.estado!==ESTADOS.VISITADA){
-            actualizadas++;
-          }
+          if(dt<ahora && o.estado===ESTADOS.RESERVADA){ o.estado=ESTADOS.VISITADA; migradasAVisitada++; }
+          else if(o.estado===ESTADOS.PENDIENTE){ o.estado=ESTADOS.RESERVADA; actualizadas++; }
+          else if(o.estado!==ESTADOS.VISITADA){ actualizadas++; }
         }
       }
     }
@@ -1268,10 +1365,7 @@ async function autoSyncSilent(){
         if(s.includes('PRESUPUESTO PENDIENTE')||s.includes('PRESUPUESTO COMPLETADO')) return false;
         if(sqlNum&&s.includes(sqlNum)) return true;
         if(telNorm&&telNorm.length>=9&&s.includes(telNorm)) return true;
-        if(clienteNorm.length>4){
-          const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
-          if(words.filter(w=>s.includes(w)).length>=2) return true;
-        }
+        if(clienteNorm.length>4){ const words=clienteNorm.split(/\s+/).filter(w=>w.length>3); if(words.filter(w=>s.includes(w)).length>=2) return true; }
         return false;
       });
       if(match){
@@ -1332,19 +1426,15 @@ function exportarJSON(){
   toast('JSON exportado','success');
 }
 
-// Abrir panel de carga de Excel sin borrar datos existentes
 function abrirPanelExcelDesdeStep(){
-  // Si ya estamos en la pantalla de upload, no hacer nada
   if(document.getElementById('viewUpload').style.display!=='none') return;
   abrirPanelExcel();
 }
-
 function volverAOrdenes(){
   document.getElementById('viewUpload').style.display='none';
   document.getElementById('viewOrdenes').style.display='block';
   setStep(2);
 }
-
 function abrirPanelExcel(){
   document.getElementById('viewUpload').style.display='block';
   document.getElementById('viewOrdenes').style.display='none';
@@ -1352,13 +1442,11 @@ function abrirPanelExcel(){
   document.getElementById('mappingCard').style.display='none';
   switchTab('excel');
   setStep(1);
-  // Si ya hay datos, mostrar botón "Volver sin importar"
   const btnVolver=document.getElementById('btnVolverOrdenes');
   if(btnVolver) btnVolver.style.display=ordenesData.length?'inline-flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
   toast('Sube un nuevo Excel para añadir más órdenes','info');
 }
-
 function resetApp(){
   rawHeaders=[];rawRows=[];ordenesData=[];citasGeneradas=[];
   document.getElementById('fileInput').value='';
@@ -1373,7 +1461,6 @@ function resetApp(){
 initDB().then(async()=>{
   const saved=await dbLoad();
   if(saved.length){
-    // Migración: asegurar que todas las órdenes tienen los nuevos campos
     ordenesData=saved.map(o=>({
       ...o,
       seleccionada:true,
