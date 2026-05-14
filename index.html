@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--color-background-tertiary,#f5f5f0);color:var(--color-text-primary,#1a1a1a);padding:1rem}
+.app{max-width:900px;margin:0 auto}
+.header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.header h1{font-size:18px;font-weight:500}
+.badge{font-size:11px;background:#185FA5;color:#E6F1FB;padding:2px 8px;border-radius:20px}
+.badge-new{background:#3B6D11;color:#EAF3DE}
+.step-bar{display:flex;gap:6px;margin-bottom:1.25rem}
+.step{flex:1;padding:7px 10px;border-radius:8px;border:.5px solid var(--color-border-tertiary,#e0e0d8);background:var(--color-background-primary,#fff);font-size:11px;color:var(--color-text-secondary,#666);display:flex;align-items:center;gap:5px;transition:all .2s}
+.step.active{border-color:#185FA5;background:#E6F1FB;color:#0C447C;font-weight:500}
+.step.done{background:#EAF3DE;border-color:#3B6D11;color:#27500A}
+.card{background:var(--color-background-primary,#fff);border:.5px solid var(--color-border-tertiary,#e0e0d8);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.tabs{display:flex;gap:0;border:.5px solid var(--color-border-secondary,#ccc);border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.tab{flex:1;padding:8px 14px;font-size:13px;cursor:pointer;border:none;background:var(--color-background-primary,#fff);color:var(--color-text-secondary,#888);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;border-right:.5px solid var(--color-border-tertiary,#e0e0d8)}
+.tab:last-child{border-right:none}
+.tab.active{background:#E6F1FB;color:#0C447C;font-weight:500}
+.tab:hover:not(.active){background:var(--color-background-secondary,#f5f5f0)}
+.upload-zone{border:1.5px dashed var(--color-border-secondary,#ccc);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s}
+.upload-zone:hover,.upload-zone.dragover{border-color:#185FA5;background:#E6F1FB}
+.upload-zone i{font-size:30px;color:var(--color-text-secondary,#888);display:block;margin-bottom:8px}
+.upload-zone strong{display:block;font-size:14px;margin-bottom:4px}
+.upload-zone p{font-size:12px;color:var(--color-text-secondary,#888)}
+.section-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-secondary,#888);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.btn{padding:7px 14px;border-radius:8px;border:.5px solid var(--color-border-secondary,#ccc);background:var(--color-background-primary,#fff);cursor:pointer;font-size:13px;color:var(--color-text-primary,#1a1a1a);display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.btn:hover{background:var(--color-background-secondary,#f5f5f0)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:#185FA5;color:#E6F1FB;border-color:#0C447C;font-weight:500}
+.btn-primary:hover{background:#0C447C}
+.btn-success{background:#3B6D11;color:#EAF3DE;border-color:#27500A;font-weight:500}
+.btn-success:hover{background:#27500A}
+.btn-danger{background:#fcebeb;color:#A32D2D;border-color:#f09595}
+.btn-danger:hover{background:#f7c1c1}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.count-badge{font-size:12px;color:var(--color-text-secondary,#888);margin-left:auto}
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1rem}
+.stat{background:var(--color-background-secondary,#f5f5f0);border-radius:8px;padding:10px 14px}
+.stat-num{font-size:20px;font-weight:500}
+.stat-label{font-size:11px;color:var(--color-text-secondary,#888);margin-top:1px}
+.zona-azul{border-left:3px solid #185FA5}
+.zona-verde{border-left:3px solid #3B6D11}
+.zona-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;margin-bottom:8px;cursor:pointer}
+.zona-azul .zona-header{background:#E6F1FB}
+.zona-verde .zona-header{background:#EAF3DE}
+.zona-azul .zona-header span{color:#0C447C;font-size:13px;font-weight:500}
+.zona-verde .zona-header span{color:#27500A;font-size:13px;font-weight:500}
+.zona-badge{font-size:11px;padding:2px 8px;border-radius:20px}
+.zona-azul .zona-badge{background:#B5D4F4;color:#0C447C}
+.zona-verde .zona-badge{background:#C0DD97;color:#27500A}
+.orden-row{display:grid;grid-template-columns:20px 1fr 90px 70px auto;gap:8px;align-items:center;padding:8px 10px;border-radius:6px;font-size:13px;border:.5px solid var(--color-border-tertiary,#e8e8e0);margin-bottom:4px;background:var(--color-background-primary,#fff);transition:all .2s}
+.orden-row.estado-pendiente{border-left:3px solid #B8860B}
+.orden-row.estado-reservada{border-left:3px solid #185FA5;background:#f5f9ff}
+.orden-row.estado-visitada{border-left:3px solid #3B6D11;background:#f8fdf5}
+.row-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.row-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:6px;border:.5px solid var(--color-border-secondary,#ccc);background:transparent;cursor:pointer;font-size:11px;color:var(--color-text-secondary,#888);transition:all .15s;white-space:nowrap}
+.row-btn:hover{background:#E6F1FB;color:#185FA5;border-color:#B5D4F4}
+.row-btn.cal-btn{background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;font-weight:500}
+.row-btn.cal-btn:hover{background:#185FA5;color:#fff}
+.row-btn.wa-btn{background:#E9FCF1;color:#1A8A43;border-color:#A8E6C0;font-weight:500}
+.row-btn.wa-btn:hover{background:#25D366;color:#fff;border-color:#25D366}
+.row-btn.wa-btn:disabled{opacity:.4;cursor:not-allowed}
+.row-btn.wa-sent{background:#f0f0ee;color:#aaa;border-color:#ddd;cursor:default}
+.row-btn.wa-sent:hover{background:#f0f0ee;color:#aaa;border-color:#ddd}
+.fecha-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;display:flex;align-items:center;justify-content:center}
+.fecha-modal{background:var(--color-background-primary,#fff);border-radius:14px;padding:24px;width:90%;max-width:340px;box-shadow:0 8px 40px rgba(0,0,0,.22)}
+.fecha-modal h3{margin:0 0 6px;font-size:15px;font-weight:600}
+.fecha-modal p{margin:0 0 16px;font-size:12px;color:var(--color-text-secondary,#888);line-height:1.5}
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.filter-btn{padding:4px 12px;border-radius:20px;border:.5px solid var(--color-border-secondary,#ccc);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text-secondary,#888);transition:all .15s}
+.filter-btn.active{background:#0C447C;color:#fff;border-color:#0C447C}
+.filter-btn:hover:not(.active){background:var(--color-background-secondary,#f5f5f0)}
+.orden-nombre{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.orden-sub{font-size:11px;color:var(--color-text-secondary,#888);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.orden-num{font-size:11px;color:var(--color-text-secondary,#888);font-family:monospace}
+.orden-familia{font-size:11px;padding:2px 7px;border-radius:12px;background:var(--color-background-secondary,#f5f5f0);color:var(--color-text-secondary,#666);white-space:nowrap}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--color-background-primary,#fff);border-radius:12px;border:.5px solid var(--color-border-tertiary,#e0e0d8);padding:1.25rem;width:540px;max-width:95vw;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.modal-title{font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field-group{display:flex;flex-direction:column;gap:4px}
+.field-group.full{grid-column:span 2}
+.field-label{font-size:11px;color:var(--color-text-secondary,#888);font-weight:500}
+.field-input{padding:6px 10px;border-radius:7px;border:.5px solid var(--color-border-secondary,#ccc);font-size:13px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a);width:100%}
+.field-input:focus{outline:none;border-color:#185FA5}
+.cal-preview-box{background:#E6F1FB;border:.5px solid #B5D4F4;border-radius:10px;padding:12px 14px;margin-bottom:1rem}
+.cal-preview-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:#185FA5;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.cal-preview-title{font-size:13px;font-weight:500;color:#0C447C;font-family:monospace;letter-spacing:.02em;line-height:1.5;word-break:break-all}
+.cal-preview-desc{font-size:11px;color:#185FA5;font-family:monospace;margin-top:4px;line-height:1.6;white-space:pre-line}
+.cal-info{background:#EAF3DE;border:.5px solid #C0DD97;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:12px;color:#27500A;display:flex;gap:8px;align-items:flex-start}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;z-index:200;animation:fadeIn .2s ease;display:flex;align-items:center;gap:8px;max-width:340px}
+.toast.success{background:#EAF3DE;color:#27500A;border:.5px solid #C0DD97}
+.toast.error{background:#FCEBEB;color:#A32D2D;border:.5px solid #F0ACAC}
+.toast.info{background:#E6F1FB;color:#0C447C;border:.5px solid #B5D4F4}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.col-select{padding:4px 8px;border-radius:6px;border:.5px solid var(--color-border-secondary,#ccc);font-size:12px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a)}
+.cita-row{padding:10px 0;border-bottom:.5px solid var(--color-border-tertiary,#eee)}
+.cita-title{font-size:12px;font-weight:500;font-family:monospace;color:var(--color-text-primary,#1a1a1a);word-break:break-all;line-height:1.5;margin-bottom:4px;display:flex;align-items:flex-start;gap:8px}
+.cita-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+
+/* Badges de estado */
+.estado-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+.estado-badge.pendiente{background:#FFF4D6;color:#9A6B00;border:1px solid #FFD166}
+.estado-badge.reservada{background:#E6F1FB;color:#0C447C;border:1px solid #B5D4F4}
+.estado-badge.visitada{background:#EAF3DE;color:#27500A;border:1px solid #C0DD97}
+
+.preprog-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:20px;background:#FFF4D6;color:#9A6B00;border:1px solid #FFD166;font-weight:600}
+
+/* Toggle presupuesto */
+.presup-toggle{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.presup-toggle.pendiente{background:#FCEBEB;color:#A32D2D;border-color:#F0ACAC}
+.presup-toggle.pendiente:hover{background:#f7c1c1}
+.presup-toggle.completado{background:#EAF3DE;color:#27500A;border-color:#C0DD97}
+.presup-toggle.completado:hover{background:#d4e8c2}
+
+/* Fecha/hora mostrada en fila */
+.reserva-info{font-size:10px;color:#185FA5;font-weight:600;display:inline-flex;align-items:center;gap:3px;background:#E6F1FB;padding:1px 6px;border-radius:4px;margin-right:4px}
+
+.spinner{width:14px;height:14px;border:2px solid #B5D4F4;border-top-color:#185FA5;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Limpiar por estado */
+.limpiar-dropdown{position:relative;display:inline-block}
+.limpiar-menu{position:absolute;top:100%;right:0;background:var(--color-background-primary,#fff);border:.5px solid var(--color-border-tertiary,#e0e0d8);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);padding:4px 0;min-width:180px;z-index:50;display:none}
+.limpiar-menu.show{display:block}
+.limpiar-menu button{display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;cursor:pointer;font-size:12px;color:var(--color-text-primary,#1a1a1a);transition:background .1s}
+.limpiar-menu button:hover{background:var(--color-background-secondary,#f5f5f0)}
+.limpiar-menu button.danger{color:#A32D2D}
+.limpiar-menu button.danger:hover{background:#FCEBEB}
+
+/* Zona contenedora sin badge para stats */
+.zona-count-in-header{font-size:10px;color:var(--color-text-secondary,#888);margin-left:6px}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body>
+<h2 class="sr-only">GesteK</h2>
+<div class="app">
+  <div class="header">
+    <i class="ti ti-calendar-event" style="font-size:22px;color:#185FA5" aria-hidden="true"></i>
+    <h1>Mediciones</h1>
+    <span class="badge">v11</span>
+    <span class="badge badge-new">Estados</span>
+  </div>
+  <div class="step-bar">
+    <div class="step active" id="step1" onclick="abrirPanelExcelDesdeStep()" style="cursor:pointer" title="Subir nuevo Excel"><i class="ti ti-upload" aria-hidden="true"></i> Excel</div>
+    <div class="step" id="step2"><i class="ti ti-list-check" aria-hidden="true"></i> Revisar</div>
+    <div class="step" id="step3"><i class="ti ti-calendar-plus" aria-hidden="true"></i> Crear citas</div>
+  </div>
+
+  <!-- VIEW: UPLOAD -->
+  <div id="viewUpload">
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" id="tabExcel" onclick="switchTab('excel')"><i class="ti ti-file-spreadsheet" aria-hidden="true"></i> Subir Excel</button>
+        <button class="tab" id="tabManual" onclick="switchTab('manual')"><i class="ti ti-pencil-plus" aria-hidden="true"></i> Añadir manual</button>
+      </div>
+      <div id="panelExcel">
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <i class="ti ti-file-spreadsheet" aria-hidden="true"></i>
+          <strong>Arrastra tu Excel aquí</strong>
+          <p>o haz clic para seleccionar · .xlsx · .xls · .csv</p>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+      </div>
+      <div id="panelManual" style="display:none">
+        <div class="field-grid">
+          <div class="field-group"><label class="field-label">Nº Orden / SQL *</label><input class="field-input" id="mOrden" placeholder="260574"></div>
+          <div class="field-group"><label class="field-label">Cliente *</label><input class="field-input" id="mCliente" placeholder="[FS] - JOSE RAMON"></div>
+          <div class="field-group"><label class="field-label">Familia</label><input class="field-input" id="mFamilia" placeholder="AIRE ACONDICIONADO"></div>
+          <div class="field-group"><label class="field-label">Ciudad *</label><input class="field-input" id="mCiudad" placeholder="IRUN"></div>
+          <div class="field-group"><label class="field-label">Código Postal *</label><input class="field-input" id="mCP" placeholder="20305"></div>
+          <div class="field-group"><label class="field-label">Dirección</label><input class="field-input" id="mDireccion" placeholder="PIO BAROJA 10, 6º A"></div>
+          <div class="field-group"><label class="field-label">Teléfono</label><input class="field-input" id="mTelefono" placeholder="648217205"></div>
+          <div class="field-group"><label class="field-label">Fecha reserva</label><input type="date" class="field-input" id="mFecha"></div>
+          <div class="field-group"><label class="field-label">Hora reserva</label><input type="time" class="field-input" id="mHora" value="09:00"></div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px" onclick="addManual()"><i class="ti ti-plus" aria-hidden="true"></i> Añadir orden</button>
+      </div>
+    </div>
+    <div class="card" id="mappingCard" style="display:none">
+      <div class="section-title"><i class="ti ti-settings" aria-hidden="true"></i> Mapeo de columnas</div>
+      <div id="mappingRows"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="procesarExcel()"><i class="ti ti-sparkles" aria-hidden="true"></i> Procesar y limpiar</button>
+        <button class="btn" onclick="resetApp()"><i class="ti ti-refresh" aria-hidden="true"></i> Reiniciar todo</button>
+        <button class="btn" id="btnVolverOrdenes" style="display:none" onclick="volverAOrdenes()"><i class="ti ti-arrow-left" aria-hidden="true"></i> Volver sin importar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: ORDENES -->
+  <div id="viewOrdenes" style="display:none">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="toolbar">
+      <button class="btn" onclick="selectAll(true)"><i class="ti ti-checkbox" aria-hidden="true"></i> Todo</button>
+      <button class="btn" onclick="selectAll(false)"><i class="ti ti-square" aria-hidden="true"></i> Ninguno</button>
+      <div class="limpiar-dropdown">
+        <button class="btn btn-danger" onclick="toggleLimpiarMenu()" id="btnLimpiar"><i class="ti ti-trash" aria-hidden="true"></i> Limpiar</button>
+        <div class="limpiar-menu" id="limpiarMenu">
+          <button class="danger" onclick="limpiarEstado('pendiente')">Limpiar Pendientes</button>
+          <button class="danger" onclick="limpiarEstado('reservada')">Limpiar Reservadas</button>
+          <button class="danger" onclick="limpiarEstado('visitada')">Limpiar Visitadas</button>
+          <button class="danger" onclick="limpiarTodo()">Limpiar TODO</button>
+        </div>
+      </div>
+      <span class="count-badge" id="selectedCount">0 sel.</span>
+      <button class="btn btn-success" onclick="abrirPanelExcel()" title="Cargar un nuevo Excel" style="margin-left:auto">
+        <i class="ti ti-file-upload" aria-hidden="true"></i> + Excel
+      </button>
+      <button class="btn" id="btnTestApi" onclick="testCalendarApi()" style="background:#FFF8E1;color:#7B5800;border-color:#FFD54F;font-size:11px" title="Probar conexión con Google Calendar API">Test API</button>
+      <button class="btn" id="btnSync" onclick="sincronizarCalendario()" style="background:#E6F1FB;color:#0C447C;border-color:#B5D4F4;font-weight:500">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Sincronizar
+      </button>
+    </div>
+    <div id="syncProgress" style="display:none;margin-bottom:10px;padding:10px 14px;background:#E6F1FB;border-radius:8px;border:1px solid #B5D4F4">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;font-weight:600;color:#0C447C"><i class="ti ti-refresh" style="font-size:12px"></i> <span id="syncMsg">Sincronizando...</span></span>
+        <span style="font-size:11px;color:#185FA5" id="syncCount"></span>
+      </div>
+      <div style="background:#B5D4F4;border-radius:4px;height:6px">
+        <div id="syncBar" style="background:#0C447C;height:6px;border-radius:4px;width:0%;transition:width .3s"></div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" id="fb-todas" onclick="setFiltro('todas')">Todas</button>
+      <button class="filter-btn" id="fb-pendientes" onclick="setFiltro('pendientes')">
+        <span style="color:#B8860B">&#9679;</span> Pendientes <span id="cnt-pendientes" style="font-size:10px;background:rgba(0,0,0,.1);border-radius:10px;padding:1px 6px"></span>
+      </button>
+      <button class="filter-btn" id="fb-reservadas" onclick="setFiltro('reservadas')">
+        <span style="color:#185FA5">&#9679;</span> Reservadas <span id="cnt-reservadas" style="font-size:10px;background:rgba(0,0,0,.1);border-radius:10px;padding:1px 6px"></span>
+      </button>
+      <button class="filter-btn" id="fb-visitadas" onclick="setFiltro('visitadas')">
+        <span style="color:#3B6D11">&#9679;</span> Visitadas <span id="cnt-visitadas" style="font-size:10px;background:rgba(0,0,0,.1);border-radius:10px;padding:1px 6px"></span>
+      </button>
+    </div>
+    <div id="zonasList"></div>
+    <div class="card" style="margin-top:1rem">
+      <div class="section-title"><i class="ti ti-calendar-event" aria-hidden="true"></i> Reservar citas</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <label style="font-size:12px;color:var(--color-text-secondary,#888)">Fecha:</label>
+        <input type="date" id="fechaInicio" style="padding:6px 10px;border-radius:7px;border:.5px solid var(--color-border-secondary,#ccc);font-size:13px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a)">
+        <label style="font-size:12px;color:var(--color-text-secondary,#888)">Hora:</label>
+        <input type="time" id="horaInicio" value="09:00" style="padding:6px 10px;border-radius:7px;border:.5px solid var(--color-border-secondary,#ccc);font-size:13px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a)">
+        <label style="font-size:12px;color:var(--color-text-secondary,#888)">Duración (min):</label>
+        <input type="number" id="duracion" value="60" min="15" style="width:65px;padding:6px 10px;border-radius:7px;border:.5px solid var(--color-border-secondary,#ccc);font-size:13px;background:var(--color-background-primary,#fff);color:var(--color-text-primary,#1a1a1a)">
+      </div>
+      <div class="cal-info"><i class="ti ti-info-circle" aria-hidden="true"></i><span>Los botones "Reservar" abren Google Calendar con el evento prellenado. Tras la reserva se muestra el botón WhatsApp.</span></div>
+      <button class="btn btn-primary" onclick="reservarSeleccionadas()" style="font-size:14px;padding:9px 18px"><i class="ti ti-calendar-plus" aria-hidden="true"></i> Reservar seleccionadas</button>
+    </div>
+  </div>
+
+  <!-- VIEW: CITAS -->
+  <div id="viewCitas" style="display:none">
+    <div class="card">
+      <div style="text-align:center;padding:.75rem 0 1rem">
+        <i class="ti ti-circle-check" style="font-size:36px;color:#3B6D11;display:block;margin-bottom:8px" aria-hidden="true"></i>
+        <div style="font-size:16px;font-weight:500;margin-bottom:4px">Citas generadas</div>
+        <p style="font-size:12px;color:var(--color-text-secondary,#888)">Eventos con formato LMNORTE listos para Google Calendar.</p>
+      </div>
+      <div id="citasList"></div>
+      <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="abrirPrimero()"><i class="ti ti-external-link" aria-hidden="true"></i> Abrir primero</button>
+        <button class="btn" onclick="exportarJSON()"><i class="ti ti-download" aria-hidden="true"></i> Exportar JSON</button>
+        <button class="btn" onclick="resetApp()"><i class="ti ti-refresh" aria-hidden="true"></i> Nueva carga</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FECHA MANUAL MODAL -->
+<div class="fecha-modal-overlay" id="fechaModalOverlay" style="display:none" onclick="if(event.target===this)cerrarFechaModal()">
+  <div class="fecha-modal">
+    <h3>Fecha no encontrada en Calendar</h3>
+    <p>No encontré el evento de <strong id="fmClienteNombre"></strong>. Introduce la fecha/hora manualmente para enviar el WhatsApp.</p>
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <div style="flex:1"><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px">Fecha</label><input type="date" id="fmFecha" class="field-input"></div>
+      <div style="flex:1"><label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px">Hora</label><input type="time" id="fmHora" value="09:00" class="field-input"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="confirmarFechaManual()"><i class="ti ti-send" aria-hidden="true"></i> Enviar WhatsApp</button>
+      <button class="btn" onclick="cerrarFechaModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal-overlay" id="modalOverlay" style="display:none" onclick="closeModalIfOuter(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="ti ti-pencil" style="font-size:18px;color:#185FA5" aria-hidden="true"></i> <span id="modalTitle">Detalle de orden</span></div>
+      <button class="btn" onclick="closeModal()" style="padding:4px 8px"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="cal-preview-box" id="calPreviewBox">
+      <div class="cal-preview-label"><i class="ti ti-calendar" style="font-size:12px" aria-hidden="true"></i> Vista previa del evento en Calendar</div>
+      <div class="cal-preview-title" id="calPreviewTitle">—</div>
+      <div class="cal-preview-desc" id="calPreviewDesc"></div>
+    </div>
+    <div class="field-grid" id="modalFields">
+      <div class="field-group"><label class="field-label">Nº WO (interno)</label><input class="field-input" id="fOrden" readonly style="background:var(--color-background-secondary,#f5f5f0)"></div>
+      <div class="field-group"><label class="field-label" style="color:#0C447C;font-weight:600">NºSQL <span style="color:#c0392b">*</span></label><input class="field-input" id="fNsql" placeholder="Ej: 260574" oninput="updatePreview()" style="border-color:#185FA5;border-width:1px"></div>
+      <div class="field-group full"><label class="field-label">Cliente</label><input class="field-input" id="fCliente" oninput="updatePreview()"></div>
+      <div class="field-group"><label class="field-label">Teléfono <span style="color:#c0392b">*</span></label><input class="field-input" id="fTelefono" placeholder="Sin datos" oninput="updatePreview()"></div>
+      <div class="field-group"><label class="field-label">Fecha reserva</label><input type="date" class="field-input" id="fFechaReserva" oninput="updatePreview()"></div>
+      <div class="field-group"><label class="field-label">Hora reserva</label><input type="time" class="field-input" id="fHoraReserva" value="09:00" oninput="updatePreview()"></div>
+      <div class="field-group full"><label class="field-label">Dirección <span style="color:#c0392b">*</span></label><input class="field-input" id="fDireccion" placeholder="Sin datos" oninput="updatePreview()"></div>
+      <div class="field-group"><label class="field-label">Ciudad</label><input class="field-input" id="fCiudad" oninput="updatePreview()"></div>
+      <div class="field-group"><label class="field-label">Código Postal</label><input class="field-input" id="fCP" oninput="updatePreview()"></div>
+      <div class="field-group"><label class="field-label">Provincia (auto)</label><input class="field-input" id="fProvincia" readonly style="background:var(--color-background-secondary,#f5f5f0)"></div>
+      <div class="field-group"><label class="field-label">Familia</label>
+        <select class="field-input" id="fFamilia" onchange="updatePreview()">
+          <option value="AIRE ACONDICIONADO">AIRE ACONDICIONADO → A/A</option>
+          <option value="CALEFACCION">CALEFACCIÓN → CAL.</option>
+          <option value="VENTILACION">VENTILACIÓN → VENT.</option>
+          <option value="BOMBA DE CALOR">BOMBA DE CALOR → B.C.</option>
+          <option value="AEROTERMIA">AEROTERMIA → AER.</option>
+          <option value="FANCOIL">FANCOIL → FAN.</option>
+          <option value="OTRO">OTRO → —</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-success" onclick="saveModalData()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Guardar</button>
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTES ────────────────────────────────────────────────
+const DB_NAME = 'mediciones_db_v11';
+const DB_VERSION = 1;
+const STORE = 'ordenes';
+let db = null;
+let rawHeaders = [], rawRows = [];
+let ordenesData = [];
+let citasGeneradas = [];
+let activeOrdenId = null;
+let filtroActivo = 'todas';
+let limpiarMenuOpen = false;
+
+// Nuevo sistema de estados
+const ESTADOS = { PENDIENTE: 'pendiente', RESERVADA: 'reservada', VISITADA: 'visitada' };
+
+const CP_MAP = {
+  '20':'GUIPÚZCOA','48':'VIZCAYA','39':'CANTABRIA','01':'ÁLAVA',
+  '28':'MADRID','08':'BARCELONA','46':'VALENCIA','41':'SEVILLA','15':'LA CORUÑA'
+};
+const ZONA_MAP = { 'GUIPÚZCOA':'azul','VIZCAYA':'verde','CANTABRIA':'verde' };
+const CIUDADES_NORM = {
+  'DONOSTIA/SAN SEBASTIÁN':'DONOSTIA','DONOSTIA-SAN SEBASTIAN':'DONOSTIA',
+  'SAN SEBASTIAN':'DONOSTIA','DONOSTIA-SAN SEBASTIÁN':'DONOSTIA'
+};
+const FAMILIA_ABREV = {
+  'AIRE ACONDICIONADO':'A/A','CALEFACCION':'CAL.','CALEFACCIÓN':'CAL.',
+  'VENTILACION':'VENT.','VENTILACIÓN':'VENT.','BOMBA DE CALOR':'B.C.',
+  'AEROTERMIA':'AER.','FANCOIL':'FAN.','CLIMATIZACION':'CLIM.','CLIMATIZACIÓN':'CLIM.'
+};
+const PREFIJO = 'LMNORTE';
+const GOOGLE_API_KEY = 'AIzaSyAFlpdoD4zwPCBWELFNhRWGE9CwgfkNvIA';
+
+const CALENDAR_IDS = {
+  'azul':     'cfe736900a89fa3896e7311782db2ab26ef1ca9b8726eb6f3356b709a5c2f311@group.calendar.google.com',
+  'verde':    '7054b2864b08aab003f2c0d16b6df2ad9d73b7d939e47f1a244746d102000ea6@group.calendar.google.com',
+  'amarillo': '4d63caab049c613efa22f7f8e4054a89cba13b422b01ab58f5dc717298252fe0@group.calendar.google.com',
+  'otra':     '4d63caab049c613efa22f7f8e4054a89cba13b422b01ab58f5dc717298252fe0@group.calendar.google.com'
+};
+
+// ── HELPERS ───────────────────────────────────────────────────
+function detectProvincia(cp){ return CP_MAP[String(cp||'').substring(0,2)] || 'OTRA'; }
+function normCliente(n){ return String(n||'').replace(/^\[FS\]\s*-\s*/i,'').trim().toUpperCase(); }
+function normCiudad(c){ const u=String(c||'').trim().toUpperCase(); return CIUDADES_NORM[u]||u; }
+function getZona(p){ return ZONA_MAP[p]||'otra'; }
+function abrevFamilia(f){ return FAMILIA_ABREV[String(f||'').toUpperCase().trim()] || String(f||'').toUpperCase(); }
+
+function buildTitle(o){
+  const sql=String(o.nSql||'').trim();
+  const abrev=abrevFamilia(o.familia);
+  const dir=o.direccion?o.direccion.trim().toUpperCase():'';
+  const ciudad=(o.ciudad||'').trim().toUpperCase();
+  const cp=(o.codigoPostal||'').trim();
+  const cliente=(o.cliente||'').trim().toUpperCase();
+  const tel=(o.telefono||'').trim();
+  const ubicParts=[dir,ciudad,cp].filter(Boolean);
+  const ubic=ubicParts.join(', ');
+  const contactParts=[cliente,tel].filter(Boolean);
+  const contacto=contactParts.join(', ');
+  let title=`${PREFIJO}${sql}. MED. ${abrev}.`;
+  if(ubic) title+=` ${ubic}.`;
+  if(contacto) title+=` ${contacto}`;
+  return title.trim();
+}
+
+function buildDescription(o){
+  const lines=[`WO: ${o.orden}`, o.nSql?`NºSQL: ${o.nSql}`:null, `Cliente: ${o.cliente}`, `Familia: ${o.familia}`];
+  if(o.direccion) lines.push(`Dirección: ${o.direccion.toUpperCase()}`);
+  lines.push(`Ciudad: ${o.ciudad} (${o.codigoPostal})`);
+  lines.push(`Provincia: ${o.provincia}`);
+  if(o.telefono) lines.push(`Tel: ${o.telefono}`);
+  return lines.filter(Boolean).join('\n');
+}
+
+function buildGoogleCalendarUrl({title,description,start,end}){
+  const fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const o=ordenesData.find(x=>x.orden===activeOrdenId)||ordenesData[0]||{};
+  const zona=getZona(o.provincia);
+  const calId=CALENDAR_IDS[zona]||CALENDAR_IDS['otra'];
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(description)}&src=${encodeURIComponent(calId)}`;
+}
+
+function validarOrden(o){
+  const missing=[];
+  if(!String(o.nSql||'').trim()) missing.push('NºSQL');
+  if(!String(o.telefono||'').trim()) missing.push('Teléfono');
+  if(!String(o.direccion||'').trim()) missing.push('Dirección');
+  return missing;
+}
+
+function mostrarErrorObligatorios(nombre, missing){
+  toast(`${nombre}: faltan → ${missing.join(', ')}`, 'error');
+}
+
+// Formatear fecha para mostrar
+function fmtFecha(fecha){
+  if(!fecha) return '';
+  try{ return new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }
+  catch(e){ return fecha; }
+}
+
+// ── INDEXED DB (solo un store, sin STORE_PROG) ────────────────
+function initDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onupgradeneeded=e=>{ const d=e.target.result; if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE,{keyPath:'orden'}); };
+    r.onsuccess=e=>{ db=e.target.result; res(db); };
+    r.onerror=rej;
+  });
+}
+function dbSave(list){
+  if(!db) return Promise.resolve();
+  return new Promise(res=>{ const tx=db.transaction(STORE,'readwrite'); const s=tx.objectStore(STORE); list.forEach(o=>s.put(o)); tx.oncomplete=()=>res(); });
+}
+function dbLoad(){
+  if(!db) return Promise.resolve([]);
+  return new Promise(res=>{ const r=db.transaction(STORE,'readonly').objectStore(STORE).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>res([]); });
+}
+function dbClear(){
+  if(!db) return Promise.resolve();
+  return new Promise(res=>{ const tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).clear(); tx.oncomplete=()=>res(); });
+}
+
+// ── TOAST / UI ────────────────────────────────────────────────
+function toast(msg,type='info'){
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  const icons={success:'ti-circle-check',error:'ti-alert-circle',info:'ti-info-circle'};
+  t.innerHTML=`<i class="ti ${icons[type]||'ti-info-circle'}" aria-hidden="true"></i> ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+function setStep(n){
+  ['step1','step2','step3'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.className='step'+(i+1===n?' active':i+1<n?' done':'');
+  });
+}
+function switchTab(t){
+  document.getElementById('tabExcel').classList.toggle('active',t==='excel');
+  document.getElementById('tabManual').classList.toggle('active',t==='manual');
+  document.getElementById('panelExcel').style.display=t==='excel'?'block':'none';
+  document.getElementById('panelManual').style.display=t==='manual'?'block':'none';
+}
+
+// ── LIMPIAR DROPDOWN ──────────────────────────────────────────
+function toggleLimpiarMenu(){
+  limpiarMenuOpen=!limpiarMenuOpen;
+  document.getElementById('limpiarMenu').classList.toggle('show',limpiarMenuOpen);
+}
+document.addEventListener('click',e=>{
+  if(limpiarMenuOpen && !e.target.closest('.limpiar-dropdown')){
+    limpiarMenuOpen=false;
+    document.getElementById('limpiarMenu').classList.remove('show');
+  }
+});
+function limpiarEstado(estado){
+  const label={pendiente:'Pendientes',reservada:'Reservadas',visitada:'Visitadas'}[estado]||estado;
+  const count=ordenesData.filter(o=>o.estado===estado).length;
+  if(!count){ toast(`No hay ${label.toLowerCase()} para limpiar`,'info'); limpiarMenuOpen=false; document.getElementById('limpiarMenu').classList.remove('show'); return; }
+  if(!confirm(`¿Eliminar ${count} orden(es) con estado "${label}"?`)) return;
+  ordenesData=ordenesData.filter(o=>o.estado!==estado);
+  dbSave(ordenesData);
+  renderOrdenes();
+  toast(`${count} ${label.toLowerCase()} eliminadas`,'success');
+  limpiarMenuOpen=false;
+  document.getElementById('limpiarMenu').classList.remove('show');
+}
+function limpiarTodo(){
+  if(!ordenesData.length){ toast('No hay datos','info'); limpiarMenuOpen=false; document.getElementById('limpiarMenu').classList.remove('show'); return; }
+  if(!confirm(`¿Eliminar TODAS las ${ordenesData.length} órdenes?`)) return;
+  ordenesData=[];
+  dbSave(ordenesData);
+  renderOrdenes();
+  toast('Todos los datos eliminados','success');
+  limpiarMenuOpen=false;
+  document.getElementById('limpiarMenu').classList.remove('show');
+}
+
+// ── EXCEL ─────────────────────────────────────────────────────
+document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
+const uz=document.getElementById('uploadZone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('dragover');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('dragover'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('dragover');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+
+function handleFile(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(data.length<2){toast('Archivo vacío','error');return;}
+      rawHeaders=data[0].map(h=>String(h).trim());
+      rawRows=data.slice(1).filter(r=>r.some(c=>c!==''));
+      mostrarMapping();
+      toast(`${rawRows.length} filas detectadas`,'success');
+    }catch(err){toast('Error: '+err.message,'error');}
+  };
+  reader.readAsBinaryString(file);
+}
+
+function mostrarMapping(){
+  document.getElementById('mappingCard').style.display='block';
+  const campos=[
+    {key:'orden',label:'Orden de trabajo',required:true,hint:'WO264…'},
+    {key:'cliente',label:'Cliente',required:true,hint:'[FS] - Nombre'},
+    {key:'familia',label:'Familias',required:false,hint:'AIRE ACONDICIONADO…'},
+    {key:'ciudad',label:'Ciudad',required:false,hint:'ANDOAIN, BILBAO…'},
+    {key:'codigoPostal',label:'Código Postal',required:false,hint:'20140, 48200…'}
+  ];
+  const patterns={
+    orden:['orden de trabajo','orden','work order','ot ','nº orden','wo'],
+    cliente:['fuente','cliente','client','nombre','name'],
+    familia:['familias','familia','equipo','tipo','product'],
+    ciudad:['ciudad','municipio','localidad','city'],
+    codigoPostal:['código postal','codigo postal','postal','cp','cod pos','zip']
+  };
+  let colMapping={orden:'',cliente:'',familia:'',ciudad:'',codigoPostal:''};
+  rawHeaders.forEach((h,ci)=>{
+    Object.keys(colMapping).forEach(k=>{
+      if(!colMapping[k]&&(patterns[k]||[]).some(p=>h.toLowerCase().includes(p)))
+        colMapping[k]=String(ci);
+    });
+  });
+  const optionsHtml=(key)=>{
+    const opts=rawHeaders.map((h,ci)=>{
+      const sample=String(rawRows[0]?.[ci]||'').substring(0,18);
+      return `<option value="${ci}" ${colMapping[key]===String(ci)?'selected':''}>${h}${sample?' — '+sample:''}</option>`;
+    }).join('');
+    return `<select class="col-select" style="width:100%;max-width:320px" onchange="colMapping['${key}']=this.value"><option value="">— no usar —</option>${opts}</select>`;
+  };
+  document.getElementById('mappingRows').innerHTML=`
+    <div style="font-size:11px;color:#27500A;background:#EAF3DE;border-radius:7px;padding:8px 12px;margin-bottom:10px;display:flex;gap:6px;align-items:center">
+      <i class="ti ti-sparkles" aria-hidden="true"></i> Auto-detectado desde los encabezados — revisa y ajusta si algo no cuadra.
+    </div>`+campos.map(c=>`
+    <div style="display:grid;grid-template-columns:160px 1fr;gap:8px;align-items:center;padding:7px 0;border-bottom:.5px solid var(--color-border-tertiary,#eee)">
+      <div><div style="font-size:12px;font-weight:600">${c.label}${c.required?' <span style="color:#c0392b">*</span>':''}</div><div style="font-size:10px;color:var(--color-text-secondary,#888)">${c.hint}</div></div>
+      ${optionsHtml(c.key)}
+    </div>`).join('');
+  // Guardar mapping para procesarExcel
+  window._colMapping=colMapping;
+}
+
+function procesarExcel(){
+  const colMapping=window._colMapping||{};
+  if(!colMapping.orden||!colMapping.cliente){toast('Asigna Orden y Cliente mínimo','error');return;}
+  const get=(row,k)=>String(row[parseInt(colMapping[k])]||'').trim();
+  const nuevas=rawRows.map(row=>{
+    const cp=get(row,'codigoPostal');
+    return{
+      orden:get(row,'orden'),
+      cliente:normCliente(get(row,'cliente')),
+      familia:get(row,'familia')||'AIRE ACONDICIONADO',
+      ciudad:normCiudad(get(row,'ciudad')),
+      codigoPostal:cp,
+      provincia:detectProvincia(cp),
+      seleccionada:true,
+      telefono:'',email:'',direccion:'',imageData:null,
+      // Nuevos campos de estado
+      estado:ESTADOS.PENDIENTE,
+      fechaReserva:'',horaReserva:'09:00',
+      whatsappEnviado:false,
+      presupuestoEstado:'pendiente',
+      calendarEventId:'',nSql:''
+    };
+  }).filter(o=>o.cliente&&o.orden);
+  ordenesData=[...ordenesData,...nuevas.filter(n=>!ordenesData.find(x=>x.orden===n.orden))];
+  dbSave(ordenesData).then(()=>{showOrdenes();toast(`${nuevas.length} órdenes procesadas`,'success');setTimeout(autoSyncSilent,800);});
+}
+
+function addManual(){
+  const cp=document.getElementById('mCP').value.trim();
+  const o={
+    orden:document.getElementById('mOrden').value.trim(),
+    cliente:normCliente(document.getElementById('mCliente').value.trim()),
+    familia:document.getElementById('mFamilia').value.trim()||'AIRE ACONDICIONADO',
+    ciudad:normCiudad(document.getElementById('mCiudad').value.trim()),
+    codigoPostal:cp,
+    provincia:detectProvincia(cp),
+    seleccionada:true,
+    telefono:'',direccion:'',imageData:null,
+    estado:ESTADOS.PENDIENTE,
+    fechaReserva:document.getElementById('mFecha').value||'',
+    horaReserva:document.getElementById('mHora').value||'09:00',
+    whatsappEnviado:false,
+    presupuestoEstado:'pendiente',
+    calendarEventId:'',nSql:''
+  };
+  if(!o.orden||!o.cliente){toast('Orden y Cliente son obligatorios','error');return;}
+  if(ordenesData.find(x=>x.orden===o.orden)){toast('Ya existe esa orden','error');return;}
+  ordenesData.push(o);
+  dbSave(ordenesData).then(()=>{showOrdenes();toast('Orden añadida','success');});
+}
+
+// ── ACTUALIZAR VISITADAS AUTOMÁTICAMENTE ─────────────────────
+function actualizarVisitadasAutomaticamente(){
+  const ahora=new Date();
+  let cambiadas=0;
+  ordenesData.forEach(o=>{
+    if(o.estado!==ESTADOS.RESERVADA) return;
+    if(!o.fechaReserva) return;
+    const fechaHora=new Date(`${o.fechaReserva}T${o.horaReserva||'09:00'}`);
+    if(fechaHora<ahora){
+      o.estado=ESTADOS.VISITADA;
+      cambiadas++;
+    }
+  });
+  if(cambiadas>0) dbSave(ordenesData);
+  return cambiadas;
+}
+
+// ── RENDER ORDENES ────────────────────────────────────────────
+function showOrdenes(){
+  document.getElementById('viewUpload').style.display='none';
+  document.getElementById('viewOrdenes').style.display='block';
+  setStep(2);
+  document.getElementById('fechaInicio').value=new Date().toISOString().split('T')[0];
+  // Ejecutar auto-actualización de visitadas
+  const cambiadas=actualizarVisitadasAutomaticamente();
+  if(cambiadas>0) renderOrdenes();
+}
+
+function renderOrdenes(){
+  // Contadores por estado
+  const pendientes=ordenesData.filter(o=>o.estado===ESTADOS.PENDIENTE).length;
+  const reservadas=ordenesData.filter(o=>o.estado===ESTADOS.RESERVADA).length;
+  const visitadas=ordenesData.filter(o=>o.estado===ESTADOS.VISITADA).length;
+
+  const cntP=document.getElementById('cnt-pendientes');
+  const cntR=document.getElementById('cnt-reservadas');
+  const cntV=document.getElementById('cnt-visitadas');
+  if(cntP) cntP.textContent=pendientes;
+  if(cntR) cntR.textContent=reservadas;
+  if(cntV) cntV.textContent=visitadas;
+
+  // Filtrar por estado activo
+  const visibles=ordenesData.filter(o=>{
+    if(filtroActivo==='todas') return true;
+    if(filtroActivo==='pendientes') return o.estado===ESTADOS.PENDIENTE;
+    if(filtroActivo==='reservadas') return o.estado===ESTADOS.RESERVADA;
+    if(filtroActivo==='visitadas') return o.estado===ESTADOS.VISITADA;
+    return true;
+  });
+
+  const total=ordenesData.length;
+  const sel=ordenesData.filter(o=>o.seleccionada).length;
+
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
+    <div class="stat"><div class="stat-num" style="color:#B8860B">${pendientes}</div><div class="stat-label">Pendientes</div></div>
+    <div class="stat"><div class="stat-num" style="color:#185FA5">${reservadas}</div><div class="stat-label">Reservadas</div></div>
+    <div class="stat"><div class="stat-num" style="color:#3B6D11">${visitadas}</div><div class="stat-label">Visitadas</div></div>
+    <div class="stat"><div class="stat-num" style="color:#185FA5">${sel}</div><div class="stat-label">Seleccionadas</div></div>
+  `;
+
+  if(!visibles.length){
+    const msgs={
+      todas:'No hay órdenes. Sube un Excel o añade manualmente.',
+      pendientes:'No hay órdenes pendientes.',
+      reservadas:'No hay órdenes reservadas.',
+      visitadas:'No hay órdenes visitadas todavía.'
+    };
+    document.getElementById('zonasList').innerHTML=`<p style="text-align:center;padding:24px;color:var(--color-text-secondary,#888);font-size:13px">${msgs[filtroActivo]||msgs.todas}</p>`;
+    updateSelectedCount();
+    return;
+  }
+
+  // Agrupar por provincia y dentro de cada provincia por estado
+  const zonas={};
+  visibles.forEach(o=>{
+    const key=o.provincia;
+    if(!zonas[key]) zonas[key]={pendiente:[],reservada:[],visitada:[]};
+    zonas[key][o.estado].push(o);
+  });
+
+  const order=['GUIPÚZCOA','VIZCAYA','CANTABRIA',...Object.keys(zonas).filter(z=>!['GUIPÚZCOA','VIZCAYA','CANTABRIA'].includes(z))];
+
+  document.getElementById('zonasList').innerHTML=order.filter(z=>zonas[z]).map(prov=>{
+    const grupos=zonas[prov];
+    const cc=getZona(prov)==='azul'?'zona-azul':getZona(prov)==='verde'?'zona-verde':'';
+    const totalZona=grupos.pendiente.length+grupos.reservada.length+grupos.visitada.length;
+
+    // Renderizar cada subgrupo por estado
+    let html='';
+    const estadoLabels={pendiente:'Pendientes',reservada:'Reservadas',visitada:'Visitadas'};
+    const estadoKeys=['pendiente','reservada','visitada'];
+
+    estadoKeys.forEach(estado=>{
+      const list=grupos[estado];
+      if(!list.length) return;
+
+      // Cabecera de subgrupo
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin:${estado==='pendiente'?'0':'10px'} 0 6px 0">
+        <span class="estado-badge ${estado}">${estadoLabels[estado]}</span>
+        <span style="font-size:11px;color:var(--color-text-secondary,#888)">${list.length}</span>
+      </div>`;
+
+      list.forEach(o=>{
+        const titlePreview=buildTitle(o);
+        const missing=validarOrden(o);
+        const warnings=missing.length?`<span style="font-size:10px;color:#c0392b;font-weight:500" title="Faltan: ${missing.join(', ')}">&#9888; ${missing.join('·')}</span>`:'';
+
+        // Info de fecha/hora para reservadas
+        const reservaInfo=(o.estado===ESTADOS.RESERVADA && o.fechaReserva)
+          ? `<span class="reserva-info"><i class="ti ti-clock" style="font-size:10px" aria-hidden="true"></i>${fmtFecha(o.fechaReserva)} ${o.horaReserva||''}</span>`
+          : '';
+
+        // Preprogramada badge para pendientes con fecha
+        const preprogBadge=(o.estado===ESTADOS.PENDIENTE && o.fechaReserva)
+          ? `<span class="preprog-badge"><i class="ti ti-clock" style="font-size:9px" aria-hidden="true"></i>PREPROGRAMADA</span>`
+          : '';
+
+        // Botones según estado
+        let botones='';
+        if(o.estado===ESTADOS.PENDIENTE){
+          botones=`
+            <button class="row-btn" onclick="openModal('${o.orden}')" title="Editar datos"><i class="ti ti-pencil" style="font-size:12px" aria-hidden="true"></i>Editar</button>
+            <button class="row-btn cal-btn" onclick="reservarOrden('${o.orden}')" title="Reservar en Google Calendar"><i class="ti ti-calendar-plus" style="font-size:12px" aria-hidden="true"></i>Reservar</button>
+            <button class="row-btn" onclick="eliminarOrden('${o.orden}')" title="Eliminar" style="color:#A32D2D;border-color:#f09595;background:#fcebeb"><i class="ti ti-trash" style="font-size:12px" aria-hidden="true"></i></button>
+            ${preprogBadge}
+          `;
+        } else if(o.estado===ESTADOS.RESERVADA){
+          if(o.whatsappEnviado){
+            botones=`
+              <span class="row-btn wa-sent" title="WhatsApp ya enviado"><i class="ti ti-message-check" style="font-size:12px" aria-hidden="true"></i>Enviado</span>
+              ${reservaInfo}
+            `;
+          } else {
+            botones=`
+              <a class="row-btn wa-btn" href="#" onclick="buscarYEnviarWa('${o.orden}');return false;" title="Buscar fecha en Calendar y enviar WhatsApp">
+                <svg style="width:12px;height:12px;fill:currentColor;flex-shrink:0" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.17 1.535 5.943L0 24l6.264-1.518A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.37l-.36-.214-3.72.9.938-3.617-.235-.372A9.818 9.818 0 1112 21.818z"/></svg>
+                WhatsApp
+              </a>
+              ${reservaInfo}
+            `;
+          }
+        } else if(o.estado===ESTADOS.VISITADA){
+          const presCls=o.presupuestoEstado==='completado'?'completado':'pendiente';
+          const presLabel=o.presupuestoEstado==='completado'?'PRESUP. COMPLETADO':'PRESUP. PENDIENTE';
+          const presIcon=o.presupuestoEstado==='completado'?'ti-circle-check':'ti-alert-circle';
+          botones=`
+            <span class="presup-toggle ${presCls}" onclick="togglePresupuesto('${o.orden}')" title="Cambiar estado del presupuesto">
+              <i class="ti ${presIcon}" style="font-size:12px" aria-hidden="true"></i>${presLabel}
+            </span>
+          `;
+        }
+
+        html+=`<div class="orden-row estado-${o.estado}" id="row-${o.orden}">
+          <input type="checkbox" ${o.seleccionada?'checked':''} onchange="toggleOrden('${o.orden}',this.checked)" aria-label="Seleccionar ${o.cliente}">
+          <div style="min-width:0">
+            <div class="orden-nombre">${o.cliente}</div>
+            <div class="orden-sub" title="${titlePreview}">
+              <i class="ti ti-calendar-event" style="font-size:10px" aria-hidden="true"></i>
+              ${titlePreview.substring(0,55)}${titlePreview.length>55?'…':''}
+              ${warnings}
+            </div>
+          </div>
+          <span class="orden-num">${o.orden}</span>
+          <span class="orden-familia">${abrevFamilia(o.familia)}</span>
+          <div class="row-actions">${botones}</div>
+        </div>`;
+      });
+    });
+
+    return `<div class="card ${cc}" style="margin-bottom:10px;padding:10px 14px">
+      <div class="zona-header" onclick="toggleZona('${prov}')">
+        <span>${prov}<span class="zona-count-in-header">(${totalZona})</span></span>
+        <span class="zona-badge">${totalZona}</span>
+      </div>
+      <div id="zona-${prov.replace(/[^a-z0-9]/gi,'_')}">${html}</div>
+    </div>`;
+  }).join('');
+  updateSelectedCount();
+}
+
+function toggleOrden(orden,val){
+  const o=ordenesData.find(x=>x.orden===orden);
+  if(o) o.seleccionada=val;
+  updateSelectedCount();
+}
+function selectAll(val){
+  ordenesData.forEach(o=>o.seleccionada=val);
+  document.querySelectorAll('.orden-row input[type=checkbox]').forEach(c=>c.checked=val);
+  updateSelectedCount();
+}
+function updateSelectedCount(){ document.getElementById('selectedCount').textContent=`${ordenesData.filter(o=>o.seleccionada).length} sel.`; }
+function toggleZona(p){ const el=document.getElementById('zona-'+p.replace(/[^a-z0-9]/gi,'_')); if(el) el.style.display=el.style.display==='none'?'':'none'; }
+
+function eliminarOrden(ordenId){
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  if(!o) return;
+  if(!confirm(`¿Eliminar "${o.cliente||ordenId}"?`)) return;
+  ordenesData=ordenesData.filter(x=>x.orden!==ordenId);
+  dbSave(ordenesData).then(()=>{renderOrdenes();toast(`Orden eliminada`,'info');});
+}
+
+function setFiltro(f){
+  filtroActivo=f;
+  ['todas','pendientes','reservadas','visitadas'].forEach(k=>{
+    const btn=document.getElementById('fb-'+k);
+    if(btn) btn.classList.toggle('active',k===f);
+  });
+  renderOrdenes();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function openModal(ordenId){
+  activeOrdenId=ordenId;
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  if(!o) return;
+  document.getElementById('modalTitle').textContent=`WO ${o.orden} · ${o.cliente}`;
+  document.getElementById('fOrden').value=o.orden;
+  document.getElementById('fNsql').value=o.nSql||'';
+  document.getElementById('fCliente').value=o.cliente;
+  document.getElementById('fTelefono').value=o.telefono||'';
+  document.getElementById('fDireccion').value=o.direccion||'';
+  document.getElementById('fCiudad').value=o.ciudad;
+  document.getElementById('fCP').value=o.codigoPostal;
+  document.getElementById('fProvincia').value=o.provincia;
+  document.getElementById('fFechaReserva').value=o.fechaReserva||'';
+  document.getElementById('fHoraReserva').value=o.horaReserva||'09:00';
+  const famSel=document.getElementById('fFamilia');
+  let matched=false;
+  for(let opt of famSel.options){ if(opt.value.toUpperCase()===String(o.familia).toUpperCase()){famSel.value=opt.value;matched=true;break;} }
+  if(!matched) famSel.selectedIndex=0;
+  updatePreview();
+  document.getElementById('modalOverlay').style.display='flex';
+}
+function closeModal(){ document.getElementById('modalOverlay').style.display='none'; activeOrdenId=null; }
+function closeModalIfOuter(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+function updatePreview(){
+  const draft={
+    orden:document.getElementById('fOrden').value,
+    nSql:document.getElementById('fNsql').value,
+    cliente:document.getElementById('fCliente').value,
+    familia:document.getElementById('fFamilia').value,
+    direccion:document.getElementById('fDireccion').value,
+    ciudad:document.getElementById('fCiudad').value,
+    codigoPostal:document.getElementById('fCP').value,
+    provincia:document.getElementById('fProvincia').value,
+    telefono:document.getElementById('fTelefono').value,
+  };
+  document.getElementById('calPreviewTitle').textContent=buildTitle(draft);
+  document.getElementById('calPreviewDesc').textContent=buildDescription(draft);
+}
+
+function saveModalData(){
+  const o=ordenesData.find(x=>x.orden===activeOrdenId);
+  if(!o) return;
+  o.cliente=document.getElementById('fCliente').value.trim().toUpperCase()||o.cliente;
+  o.nSql=document.getElementById('fNsql').value.trim();
+  o.telefono=document.getElementById('fTelefono').value.trim();
+  o.direccion=document.getElementById('fDireccion').value.trim().toUpperCase();
+  const cp=document.getElementById('fCP').value.trim();
+  o.codigoPostal=cp;
+  o.provincia=detectProvincia(cp)||o.provincia;
+  o.ciudad=normCiudad(document.getElementById('fCiudad').value.trim())||o.ciudad;
+  o.familia=document.getElementById('fFamilia').value||o.familia;
+  o.fechaReserva=document.getElementById('fFechaReserva').value;
+  o.horaReserva=document.getElementById('fHoraReserva').value||'09:00';
+  dbSave(ordenesData).then(()=>{renderOrdenes();closeModal();toast('Datos guardados','success');});
+}
+
+// ── RESERVAR ORDEN ────────────────────────────────────────────
+function reservarOrden(ordenId){
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  if(!o) return;
+
+  // Validar campos obligatorios
+  const missing=validarOrden(o);
+  if(missing.length){
+    mostrarErrorObligatorios(o.cliente||ordenId, missing);
+    openModal(ordenId);
+    return;
+  }
+
+  // Usar fecha de la orden si existe, si no la del formulario global
+  const fecha=o.fechaReserva || document.getElementById('fechaInicio').value;
+  const hora=o.horaReserva || document.getElementById('horaInicio').value || '09:00';
+
+  if(!fecha){
+    toast('Indica fecha de reserva (edita la orden o usa el formulario inferior)','error');
+    return;
+  }
+
+  activeOrdenId=ordenId;
+  const inicio=new Date(`${fecha}T${hora}:00`);
+  const fin=new Date(inicio.getTime()+60*60000);
+  const url=buildGoogleCalendarUrl({title:buildTitle(o),description:buildDescription(o),start:inicio,end:fin});
+
+  // Cambiar estado a reservada
+  o.estado=ESTADOS.RESERVADA;
+  o.fechaReserva=fecha;
+  o.horaReserva=hora;
+  dbSave(ordenesData);
+
+  window.open(url,'_blank');
+  renderOrdenes();
+  toast('Reserva preparada en Google Calendar','success');
+}
+
+// Reservar múltiples seleccionadas
+function reservarSeleccionadas(){
+  const sel=ordenesData.filter(o=>o.seleccionada && o.estado===ESTADOS.PENDIENTE);
+  if(!sel.length){toast('Selecciona al menos una orden pendiente','error');return;}
+
+  const fecha=document.getElementById('fechaInicio').value;
+  const hora=document.getElementById('horaInicio').value||'09:00';
+  const dur=parseInt(document.getElementById('duracion').value)||60;
+  if(!fecha){toast('Selecciona fecha','error');return;}
+
+  // Validar todas
+  const invalidas=sel.map(o=>({o,missing:validarOrden(o)})).filter(x=>x.missing.length);
+  if(invalidas.length){
+    invalidas.forEach(({o,missing})=>mostrarErrorObligatorios(o.cliente||o.orden, missing));
+    toast(`${invalidas.length} orden(es) con datos incompletos`,'error');
+    return;
+  }
+
+  citasGeneradas=sel.map((o,i)=>{
+    const[h,m]=hora.split(':').map(Number);
+    const sm=h*60+m+i*dur;
+    const hh=String(Math.floor(sm/60)).padStart(2,'0');
+    const mm=String(sm%60).padStart(2,'0');
+    const inicio=new Date(`${fecha}T${hh}:${mm}:00`);
+    const fin=new Date(inicio.getTime()+dur*60000);
+    const fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+    const zona=getZona(o.provincia);
+    const calId=CALENDAR_IDS[zona]||CALENDAR_IDS['otra'];
+    const title=buildTitle(o);
+    const desc=buildDescription(o);
+    // Cambiar estado y guardar fecha
+    o.estado=ESTADOS.RESERVADA;
+    o.fechaReserva=fecha;
+    o.horaReserva=`${hh}:${mm}`;
+    return{title,description:desc,start:fmt(inicio),end:fmt(fin),color:getZona(o.provincia)==='azul'?'blue':'green',
+      gcUrl:`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmt(inicio)}/${fmt(fin)}&details=${encodeURIComponent(desc)}&src=${encodeURIComponent(calId)}`};
+  });
+
+  dbSave(ordenesData);
+  document.getElementById('viewOrdenes').style.display='none';
+  document.getElementById('viewCitas').style.display='block';
+  setStep(3);
+  renderCitas();
+  toast(`${citasGeneradas.length} reservas generadas`,'success');
+}
+
+// ── TOGGLE PRESUPUESTO ────────────────────────────────────────
+function togglePresupuesto(ordenId){
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  if(!o) return;
+  o.presupuestoEstado=o.presupuestoEstado==='pendiente'?'completado':'pendiente';
+  dbSave(ordenesData);
+  renderOrdenes();
+}
+
+// ── PARSER DE TÍTULO CALENDAR ─────────────────────────────────
+function parseTituloEvento(summary){
+  if(!summary) return null;
+  try{
+    const result={};
+    const sqlMatch=summary.match(/LMNORTE(\d+)/i);
+    if(sqlMatch) result.nSql=sqlMatch[1];
+    const telMatch=summary.match(/(\d{9,})[^\d]*$/);
+    if(telMatch) result.telefono=telMatch[1];
+    const cpMatch=summary.match(/\b(\d{5})\b/);
+    if(cpMatch) result.codigoPostal=cpMatch[1];
+    const clienteMatch=summary.match(/\.\s+([A-ZÁÉÍÓÚÑÜ][^.]+),\s*\d{9,}[^\d]*$/);
+    if(clienteMatch) result.cliente=clienteMatch[1].trim();
+    const partes=summary.split(/\.\s+/);
+    if(partes.length>=4){
+      const dirBlock=partes[3];
+      const dirClean=dirBlock.replace(/,?\s*\d{5}\s*$/,'').trim();
+      const dirParts=dirClean.split(',').map(s=>s.trim()).filter(Boolean);
+      if(dirParts.length>=2){
+        result.ciudad=dirParts[dirParts.length-1];
+        result.direccion=dirParts.slice(0,dirParts.length-1).join(', ');
+      } else {
+        result.direccion=dirClean;
+      }
+    }
+    return result;
+  }catch(e){ return null; }
+}
+
+// ── GOOGLE CALENDAR API ───────────────────────────────────────
+async function fetchEventFromCalendar(ordenId){
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  if(!o) return null;
+  const calIds=[CALENDAR_IDS['azul'],CALENDAR_IDS['verde'],CALENDAR_IDS['amarillo']];
+  const tMin=new Date(Date.now()-120*86400000).toISOString();
+  const tMax=new Date(Date.now()+365*86400000).toISOString();
+  for(const calId of calIds){
+    try{
+      const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?key=${GOOGLE_API_KEY}&timeMin=${tMin}&timeMax=${tMax}&singleEvents=true&orderBy=startTime&maxResults=250`;
+      const res=await fetch(url);
+      if(!res.ok) continue;
+      const data=await res.json();
+      const items=data.items||[];
+      const sqlNum=String(o.nSql||'').trim();
+      const telNorm=String(o.telefono||'').replace(/\D/g,'');
+      const clienteNorm=String(o.cliente||'').toUpperCase().replace(/\[FS\]\s*-?\s*/,'').trim();
+      const match=items.find(ev=>{
+        const s=(ev.summary||'').toUpperCase();
+        if(sqlNum && s.includes(sqlNum)) return true;
+        if(telNorm && telNorm.length>=9 && s.includes(telNorm)) return true;
+        if(clienteNorm.length>4){
+          const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
+          if(words.filter(w=>s.includes(w)).length>=2) return true;
+        }
+        return false;
+      });
+      if(match){
+        const start=match.start?.dateTime||match.start?.date;
+        const dt=start?new Date(start):null;
+        return{fecha:dt?dt.toISOString().split('T')[0]:null,hora:dt&&match.start?.dateTime?dt.toTimeString().substring(0,5):null,titulo:match.summary||'',calId};
+      }
+    }catch(e){ console.warn('Cal search error',e); }
+  }
+  return null;
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────────
+function buildWaMsg(o,fecha,hora){
+  const abrev=abrevFamilia(o.familia);
+  let fechaFmt='(fecha pendiente)';
+  if(fecha){
+    try{ fechaFmt=new Date(fecha+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}); }
+    catch(e){ fechaFmt=fecha; }
+  }
+  const horaFmt=hora||'(hora pendiente)';
+  const dir=o.direccion||o.ciudad||'';
+  return `Hola ${o.cliente}, le contactamos de *Leroy Merlin* para confirmarle su cita de medición de *${abrev}*.\n\n📅 Fecha: ${fechaFmt}\n🕐 Hora: ${horaFmt}\n📍 Dirección: ${dir}\n\n¿Puede confirmarnos la cita? Responda *SÍ* para confirmar o *NO* si necesita cambiarla.\n\nGracias.`;
+}
+
+async function buscarYEnviarWa(ordenId){
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  if(!o){ toast('Orden no encontrada','error'); return; }
+  if(!o.telefono){ toast('Esta orden no tiene teléfono','error'); return; }
+
+  // Si ya tenemos la fecha de reserva, usarla directamente
+  if(o.fechaReserva){
+    enviarWaConFecha(o, o.fechaReserva, o.horaReserva);
+    return;
+  }
+
+  const btn=document.querySelector(`#row-${ordenId} .wa-btn`);
+  if(btn){ btn.innerHTML='Buscando...'; btn.style.pointerEvents='none'; }
+
+  try{
+    const ev=await fetchEventFromCalendar(ordenId);
+    if(ev) enviarWaConFecha(o, ev.fecha, ev.hora);
+    else abrirFechaManual(ordenId);
+  }catch(e){
+    toast('Error buscando en Calendar','error');
+  }finally{
+    renderOrdenes();
+  }
+}
+
+let _fechaManualOrdenId=null;
+function abrirFechaManual(ordenId){
+  _fechaManualOrdenId=ordenId;
+  const o=ordenesData.find(x=>x.orden===ordenId);
+  document.getElementById('fmClienteNombre').textContent=o?.cliente||ordenId;
+  document.getElementById('fmFecha').value='';
+  document.getElementById('fmHora').value='09:00';
+  document.getElementById('fechaModalOverlay').style.display='flex';
+}
+function cerrarFechaModal(){ document.getElementById('fechaModalOverlay').style.display='none'; _fechaManualOrdenId=null; }
+function confirmarFechaManual(){
+  const fecha=document.getElementById('fmFecha').value;
+  const hora=document.getElementById('fmHora').value;
+  if(!fecha){ toast('Introduce la fecha','error'); return; }
+  cerrarFechaModal();
+  const o=ordenesData.find(x=>x.orden===_fechaManualOrdenId);
+  if(o) enviarWaConFecha(o, fecha, hora);
+}
+function enviarWaConFecha(o,fecha,hora){
+  const tel=String(o.telefono||'').replace(/\D/g,'');
+  const telFull=tel.startsWith('34')?tel:'34'+tel;
+  const msg=buildWaMsg(o,fecha,hora);
+  // Marcar como enviado
+  o.whatsappEnviado=true;
+  dbSave(ordenesData);
+  renderOrdenes();
+  window.open(`https://wa.me/${telFull}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+// ── SINCRONIZACIÓN ────────────────────────────────────────────
+async function sincronizarCalendario(){
+  if(!ordenesData.length){ toast('Carga primero un Excel','error'); return; }
+  const btn=document.getElementById('btnSync');
+  const prog=document.getElementById('syncProgress');
+  const bar=document.getElementById('syncBar');
+  const msg=document.getElementById('syncMsg');
+  const cnt=document.getElementById('syncCount');
+  btn.disabled=true;
+  prog.style.display='block';
+  msg.textContent='Leyendo calendarios...';
+  bar.style.width='0%';
+  cnt.textContent='';
+
+  try{
+    const tMin=new Date(Date.now()-120*86400000).toISOString();
+    const tMax=new Date(Date.now()+365*86400000).toISOString();
+    const calEntries=[
+      {id:CALENDAR_IDS['azul'],zona:'azul'},
+      {id:CALENDAR_IDS['verde'],zona:'verde'},
+      {id:CALENDAR_IDS['amarillo'],zona:'amarillo'}
+    ];
+    let allEvents=[];
+    for(let i=0;i<calEntries.length;i++){
+      const{id,zona}=calEntries[i];
+      const zonaLabel=zona==='azul'?'Guipúzcoa':zona==='verde'?'Vizcaya/Cantabria':'Madrid/Toledo';
+      msg.textContent=`Leyendo ${zonaLabel}...`;
+      bar.style.width=`${Math.round((i/3)*60)}%`;
+      let pageToken=null;
+      do{
+        const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(id)}/events?key=${GOOGLE_API_KEY}&timeMin=${tMin}&timeMax=${tMax}&singleEvents=true&orderBy=startTime&maxResults=250${pageToken?'&pageToken='+pageToken:''}`;
+        const res=await fetch(url);
+        if(!res.ok){ console.warn('Calendar fetch error',zona,res.status); break; }
+        const data=await res.json();
+        (data.items||[]).forEach(ev=>allEvents.push({...ev,_zona:zona}));
+        pageToken=data.nextPageToken||null;
+      }while(pageToken);
+    }
+
+    msg.textContent='Cruzando datos...';
+    bar.style.width='70%';
+
+    let encontradas=0,actualizadas=0,migradasAVisitada=0;
+    const ahora=new Date();
+
+    for(const o of ordenesData){
+      const sqlNum=String(o.nSql||'').trim();
+      const clienteNorm=String(o.cliente||'').toUpperCase().replace(/\[FS\]\s*-?\s*/,'').trim();
+      const telNorm=String(o.telefono||'').replace(/\D/g,'');
+
+      const match=allEvents.find(ev=>{
+        const s=(ev.summary||'').toUpperCase();
+        // Ignorar eventos de presupuesto
+        if(s.includes('PRESUPUESTO PENDIENTE')||s.includes('PRESUPUESTO COMPLETADO')){
+          if(telNorm&&telNorm.length>=9&&s.includes(telNorm)) return true;
+          if(clienteNorm.length>4){
+            const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
+            if(words.filter(w=>s.includes(w)).length>=2) return true;
+          }
+          return false;
+        }
+        if(sqlNum&&s.includes(sqlNum)) return true;
+        if(telNorm&&telNorm.length>=9&&s.includes(telNorm)) return true;
+        if(clienteNorm.length>4){
+          const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
+          if(words.filter(w=>s.includes(w)).length>=2) return true;
+        }
+        return false;
+      });
+
+      if(match){
+        encontradas++;
+        // Backfill campos
+        const parsed=parseTituloEvento(match.summary||'');
+        if(parsed){
+          if(!o.nSql&&parsed.nSql) o.nSql=parsed.nSql;
+          if(!o.telefono&&parsed.telefono) o.telefono=parsed.telefono;
+          if(!o.direccion&&parsed.direccion) o.direccion=parsed.direccion;
+          if(!o.ciudad&&parsed.ciudad) o.ciudad=parsed.ciudad;
+          if(!o.codigoPostal&&parsed.codigoPostal) o.codigoPostal=parsed.codigoPostal;
+        }
+        // Guardar fecha/hora del evento
+        const start=match.start?.dateTime||match.start?.date;
+        if(start){
+          const dt=new Date(start);
+          o.fechaReserva=dt.toISOString().split('T')[0];
+          o.horaReserva=match.start?.dateTime?dt.toTimeString().substring(0,5):null;
+          o.calendarEventId=match.id||'';
+          // Auto-migrar a visitada si la fecha ya pasó
+          if(dt<ahora && o.estado===ESTADOS.RESERVADA){
+            o.estado=ESTADOS.VISITADA;
+            migradasAVisitada++;
+          } else if(o.estado===ESTADOS.PENDIENTE){
+            o.estado=ESTADOS.RESERVADA;
+            actualizadas++;
+          } else if(o.estado!==ESTADOS.VISITADA){
+            actualizadas++;
+          }
+        }
+      }
+    }
+
+    await dbSave(ordenesData);
+    bar.style.width='100%';
+    const pendientes=ordenesData.filter(o=>o.estado===ESTADOS.PENDIENTE).length;
+    msg.textContent='Sincronización completada';
+    cnt.textContent=`${encontradas} encontradas · ${actualizadas} nuevas · ${migradasAVisitada}→visitadas · ${pendientes} pendientes`;
+    setTimeout(()=>{prog.style.display='none';},5000);
+    renderOrdenes();
+    toast(`Sync: ${encontradas} en calendar · ${migradasAVisitada} migradas a visitadas`,'success');
+  }catch(e){
+    console.error('Sync error',e);
+    prog.style.display='none';
+    toast('Error de sincronización: '+e.message,'error');
+  }finally{ btn.disabled=false; }
+}
+
+async function autoSyncSilent(){
+  if(!ordenesData.length) return;
+  try{
+    const tMin=new Date(Date.now()-120*86400000).toISOString();
+    const tMax=new Date(Date.now()+365*86400000).toISOString();
+    let allEvents=[];
+    for(const[zona,id] of Object.entries(CALENDAR_IDS)){
+      if(zona==='otra') continue;
+      try{
+        const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(id)}/events?key=${GOOGLE_API_KEY}&timeMin=${tMin}&timeMax=${tMax}&singleEvents=true&maxResults=250`;
+        const res=await fetch(url);
+        if(!res.ok) continue;
+        const data=await res.json();
+        (data.items||[]).forEach(ev=>allEvents.push(ev));
+      }catch(e){}
+    }
+    const ahora=new Date();
+    let updated=0;
+    for(const o of ordenesData){
+      const sqlNum=String(o.nSql||'').trim();
+      const clienteNorm=String(o.cliente||'').toUpperCase().replace(/\[FS\]\s*-?\s*/,'').trim();
+      const telNorm=String(o.telefono||'').replace(/\D/g,'');
+      const match=allEvents.find(ev=>{
+        const s=(ev.summary||'').toUpperCase();
+        if(s.includes('PRESUPUESTO PENDIENTE')||s.includes('PRESUPUESTO COMPLETADO')) return false;
+        if(sqlNum&&s.includes(sqlNum)) return true;
+        if(telNorm&&telNorm.length>=9&&s.includes(telNorm)) return true;
+        if(clienteNorm.length>4){
+          const words=clienteNorm.split(/\s+/).filter(w=>w.length>3);
+          if(words.filter(w=>s.includes(w)).length>=2) return true;
+        }
+        return false;
+      });
+      if(match){
+        const start=match.start?.dateTime||match.start?.date;
+        if(start){
+          const dt=new Date(start);
+          if(!o.fechaReserva){ o.fechaReserva=dt.toISOString().split('T')[0]; o.horaReserva=match.start?.dateTime?dt.toTimeString().substring(0,5):null; }
+          if(dt<ahora && o.estado===ESTADOS.RESERVADA){ o.estado=ESTADOS.VISITADA; updated++; }
+          else if(o.estado===ESTADOS.PENDIENTE){ o.estado=ESTADOS.RESERVADA; updated++; }
+        }
+      }
+    }
+    if(updated>0){ await dbSave(ordenesData); renderOrdenes(); toast(`${updated} órdenes actualizadas automáticamente`,'info'); }
+  }catch(e){}
+}
+
+async function testCalendarApi(){
+  toast('Probando conexión...','info');
+  const tMin=new Date(Date.now()-30*86400000).toISOString();
+  const tMax=new Date(Date.now()+30*86400000).toISOString();
+  const results=[];
+  for(const[zona,id] of Object.entries(CALENDAR_IDS)){
+    if(zona==='otra') continue;
+    try{
+      const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(id)}/events?key=${GOOGLE_API_KEY}&timeMin=${tMin}&timeMax=${tMax}&maxResults=10&singleEvents=true`;
+      const res=await fetch(url);
+      const data=await res.json();
+      if(data.error) results.push(`${zona}: ${data.error.message}`);
+      else results.push(`${zona}: ${data.items?.length||0} eventos (30d)`);
+    }catch(e){ results.push(`${zona}: ${e.message}`); }
+  }
+  alert('Test API Calendar:\n\n'+results.join('\n'));
+}
+
+// ── CITAS VIEW ────────────────────────────────────────────────
+function renderCitas(){
+  document.getElementById('citasList').innerHTML=citasGeneradas.map(c=>`
+    <div class="cita-row">
+      <div class="cita-title">
+        <div class="cita-dot" style="background:${c.color==='blue'?'#185FA5':'#3B6D11'}"></div>
+        <span>${c.title}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:4px">
+        <a href="${c.gcUrl}" target="_blank" style="font-size:12px;color:#185FA5;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+          <i class="ti ti-calendar-plus" style="font-size:13px" aria-hidden="true"></i> Añadir a Calendar
+        </a>
+      </div>
+    </div>
+  `).join('');
+}
+function abrirPrimero(){ if(citasGeneradas[0]) window.open(citasGeneradas[0].gcUrl,'_blank'); }
+function exportarJSON(){
+  const b=new Blob([JSON.stringify(citasGeneradas,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u; a.download='citas_mediciones.json'; a.click();
+  URL.revokeObjectURL(u);
+  toast('JSON exportado','success');
+}
+
+// Abrir panel de carga de Excel sin borrar datos existentes
+function abrirPanelExcelDesdeStep(){
+  // Si ya estamos en la pantalla de upload, no hacer nada
+  if(document.getElementById('viewUpload').style.display!=='none') return;
+  abrirPanelExcel();
+}
+
+function volverAOrdenes(){
+  document.getElementById('viewUpload').style.display='none';
+  document.getElementById('viewOrdenes').style.display='block';
+  setStep(2);
+}
+
+function abrirPanelExcel(){
+  document.getElementById('viewUpload').style.display='block';
+  document.getElementById('viewOrdenes').style.display='none';
+  document.getElementById('viewCitas').style.display='none';
+  document.getElementById('mappingCard').style.display='none';
+  switchTab('excel');
+  setStep(1);
+  // Si ya hay datos, mostrar botón "Volver sin importar"
+  const btnVolver=document.getElementById('btnVolverOrdenes');
+  if(btnVolver) btnVolver.style.display=ordenesData.length?'inline-flex':'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  toast('Sube un nuevo Excel para añadir más órdenes','info');
+}
+
+function resetApp(){
+  rawHeaders=[];rawRows=[];ordenesData=[];citasGeneradas=[];
+  document.getElementById('fileInput').value='';
+  document.getElementById('mappingCard').style.display='none';
+  document.getElementById('viewUpload').style.display='block';
+  document.getElementById('viewOrdenes').style.display='none';
+  document.getElementById('viewCitas').style.display='none';
+  setStep(1);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+initDB().then(async()=>{
+  const saved=await dbLoad();
+  if(saved.length){
+    // Migración: asegurar que todas las órdenes tienen los nuevos campos
+    ordenesData=saved.map(o=>({
+      ...o,
+      seleccionada:true,
+      estado:o.estado||ESTADOS.PENDIENTE,
+      fechaReserva:o.fechaReserva||'',
+      horaReserva:o.horaReserva||'09:00',
+      whatsappEnviado:o.whatsappEnviado||false,
+      presupuestoEstado:o.presupuestoEstado||'pendiente',
+      calendarEventId:o.calendarEventId||'',
+      nSql:o.nSql||''
+    }));
+    showOrdenes();
+    const p=ordenesData.filter(o=>o.estado===ESTADOS.PENDIENTE).length;
+    const r=ordenesData.filter(o=>o.estado===ESTADOS.RESERVADA).length;
+    const v=ordenesData.filter(o=>o.estado===ESTADOS.VISITADA).length;
+    toast(`${saved.length} órdenes · ${p} pendientes · ${r} reservadas · ${v} visitadas`,'info');
+  }
+}).catch(e=>{console.error(e);toast('IndexedDB no disponible','error');});
+</script>
+</body>
+</html>
